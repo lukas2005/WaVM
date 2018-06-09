@@ -32,7 +32,7 @@ public class WVCore {
 	@EventHandler
 	public static void corePreInit(FMLPreInitializationEvent e) {
 		proxy.preInit(e);
-
+		
 		PacketRegister.regMessages(MODID);
 	}
 

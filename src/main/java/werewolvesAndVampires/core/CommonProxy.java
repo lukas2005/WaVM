@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import werewolvesAndVampires.werewolves.capability.WerewolfCapability;
 
 @Mod.EventBusSubscriber
 public class CommonProxy {
@@ -18,7 +19,7 @@ public class CommonProxy {
 	}
 	
 	public void init(FMLInitializationEvent e) {
-		
+		WerewolfCapability.register();
 	}
 	
 	public void postInit(FMLPostInitializationEvent e) {
