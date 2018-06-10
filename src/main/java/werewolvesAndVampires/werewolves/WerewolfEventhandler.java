@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumParticleTypes;
@@ -25,6 +26,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import werewolvesAndVampires.core.WVCore;
+import werewolvesAndVampires.core.WVItems;
 import werewolvesAndVampires.packets.PacketRegister;
 import werewolvesAndVampires.packets.SyncWerewolfCap;
 import werewolvesAndVampires.werewolves.capability.IWerewolf;
@@ -63,7 +65,7 @@ public class WerewolfEventhandler {
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
 		EntityPlayer p = e.player;
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime()) {
+		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 			if (!were.getIsTransformed()) {
 				were.setIsTransformed(true);
 				PacketRegister.INSTANCE.sendTo(new SyncWerewolfCap(were), (EntityPlayerMP) p);
