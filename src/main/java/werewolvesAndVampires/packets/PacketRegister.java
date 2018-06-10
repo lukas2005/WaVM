@@ -19,7 +19,6 @@ public class PacketRegister {
 
     public static void regMessages(String channelName) {
         INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(channelName);
-        //INSTANCE.registerMessage(BasePacket.Handler.class, BasePacket.class, nextID(), Side);
         INSTANCE.registerMessage(SyncWerewolfCap.Handler.class, SyncWerewolfCap.class, nextID(), Side.CLIENT);
         
     }
