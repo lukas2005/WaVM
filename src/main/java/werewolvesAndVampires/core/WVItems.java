@@ -10,13 +10,12 @@ import werewolvesAndVampires.items.ItemWerewolfTotem;
 public class WVItems {
 	
 	//Item References go here
-	public static BaseItem werewolf_totem = new ItemWerewolfTotem();
+	public static final BaseItem werewolf_totem = null;
 	
 	
 	
-
 	public static void regItems(RegistryEvent.Register<Item> event) {
-		event.getRegistry().register(werewolf_totem);
+		event.getRegistry().register(new ItemWerewolfTotem());
 	}
 	
 	public static void regModels() {

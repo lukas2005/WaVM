@@ -37,7 +37,7 @@ import werewolvesAndVampires.werewolves.rendering.WerewolfRenderPlayer;
 public class WerewolfEventhandler {
 
 	public static final ResourceLocation werewolfCapLoc = new ResourceLocation(WVCore.MODID, "werewolf");
-	private static Random rand = new Random();
+	
 
 	@SideOnly(Side.CLIENT)
 	private static WerewolfRenderPlayer wereRender = null;
@@ -67,32 +67,15 @@ public class WerewolfEventhandler {
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
 		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 			if (!were.getIsTransformed()) {
-				were.setIsTransformed(true);
-				PacketRegister.INSTANCE.sendTo(new SyncWerewolfCap(were), (EntityPlayerMP) p);
-				WorldServer ws = (WorldServer) e.player.world;
-				int i = 0;
-				while (i < 450) {
-					ws.spawnParticle(EnumParticleTypes.CLOUD, e.player.posX + rand.nextGaussian(),
-							e.player.posY + rand.nextGaussian(), e.player.posZ + rand.nextGaussian(), 1, 0, 1, 0, 0,
-							null);
-					++i;
-				}
+				WerewolfHelpers.TransformPlayer(p, were, true);
 			}
-		} else if (e.side.isServer()) {
+		} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 
 			if (were.getIsTransformed()) {
-				were.setIsTransformed(false);
-				PacketRegister.INSTANCE.sendTo(new SyncWerewolfCap(were), (EntityPlayerMP) p);
-				WorldServer ws = (WorldServer) e.player.world;
-				int i = 0;
-				while (i < 450) {
-					ws.spawnParticle(EnumParticleTypes.CLOUD, e.player.posX + rand.nextGaussian(),
-							e.player.posY + rand.nextGaussian(), e.player.posZ + rand.nextGaussian(), 1, 0, 1, 0, 0,
-							null);
-					++i;
-				}
+				WerewolfHelpers.TransformPlayer(p, were, false);
 			}
 		}
+		
 		if (were.getIsTransformed()) {
 			p.stepHeight = 1.25F;
 			p.addPotionEffect(new PotionEffect(Potion.getPotionById(16), 300, 0, false, false));
