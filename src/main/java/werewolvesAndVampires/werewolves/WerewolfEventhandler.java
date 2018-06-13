@@ -1,7 +1,5 @@
 package werewolvesAndVampires.werewolves;
 
-import java.util.Random;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
@@ -11,15 +9,15 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.WorldServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -37,7 +35,6 @@ import werewolvesAndVampires.werewolves.rendering.WerewolfRenderPlayer;
 public class WerewolfEventhandler {
 
 	public static final ResourceLocation werewolfCapLoc = new ResourceLocation(WVCore.MODID, "werewolf");
-	
 
 	@SideOnly(Side.CLIENT)
 	private static WerewolfRenderPlayer wereRender = null;
@@ -48,7 +45,8 @@ public class WerewolfEventhandler {
 			e.addCapability(werewolfCapLoc, new WerewolfProvider());
 		}
 	}
-
+	
+	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public static void renderPlayer(RenderPlayerEvent.Pre e) {
 		IWerewolf were = e.getEntityPlayer().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
@@ -65,7 +63,10 @@ public class WerewolfEventhandler {
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
 		EntityPlayer p = e.player;
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
+		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime()
+				&& !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))
+				&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY, e.player.posZ))) {
+
 			if (!were.getIsTransformed()) {
 				WerewolfHelpers.TransformPlayer(p, were, true);
 			}
@@ -75,7 +76,7 @@ public class WerewolfEventhandler {
 				WerewolfHelpers.TransformPlayer(p, were, false);
 			}
 		}
-		
+
 		if (were.getIsTransformed()) {
 			p.stepHeight = 1.25F;
 			p.addPotionEffect(new PotionEffect(Potion.getPotionById(16), 300, 0, false, false));
@@ -91,7 +92,7 @@ public class WerewolfEventhandler {
 
 	@SubscribeEvent
 	public static void onFall(LivingFallEvent e) {
-		if (e.getEntityLiving() instanceof EntityPlayer && e.getEntity().world.isRemote) {
+		if (e.getEntityLiving() instanceof EntityPlayer && !e.getEntity().world.isRemote) {
 			EntityPlayer p = (EntityPlayer) e.getEntityLiving();
 			IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
 			if (were.getIsTransformed() && e.getDistance() < 5) {
@@ -113,7 +114,7 @@ public class WerewolfEventhandler {
 
 	@SubscribeEvent
 	public static void onDamage(LivingHurtEvent e) {
-		if (e.getEntityLiving() instanceof EntityPlayer && e.getEntity().world.isRemote) {
+		if (e.getEntityLiving() instanceof EntityPlayer && !e.getEntity().world.isRemote) {
 			EntityPlayer p = (EntityPlayer) e.getEntityLiving();
 			IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
 			if (were.getIsTransformed()) {
@@ -123,6 +124,16 @@ public class WerewolfEventhandler {
 					e.setAmount(e.getAmount() / 2);
 				}
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void onJoin(EntityJoinWorldEvent e) {
+		if (e.getEntity() instanceof EntityPlayer && !e.getWorld().isRemote) {
+			PacketRegister.INSTANCE.sendTo(
+					new SyncWerewolfCap(
+							((EntityPlayerMP) e.getEntity()).getCapability(WerewolfProvider.WEREWOLF_CAP, null)),
+					((EntityPlayerMP) e.getEntity()));
 		}
 	}
 

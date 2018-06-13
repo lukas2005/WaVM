@@ -24,6 +24,13 @@ public class WerewolfHelpers {
 					null);
 			++i;
 		}
+		
+		if(were.getIsTransformed()) {
+			p.setEntityBoundingBox(p.getEntityBoundingBox().expand(0, 0.5, 0));
+		}else {
+			p.setEntityBoundingBox(p.getEntityBoundingBox().contract(0, 0.5, 0));
+		}
+			
 	}
 	
 }
