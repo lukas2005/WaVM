@@ -26,7 +26,7 @@ public class ItemWerewolfTotem extends BaseItem {
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
 		if(!worldIn.isRemote) {
 		IWerewolf were = playerIn.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		WerewolfHelpers.TransformPlayer(playerIn, were, !were.getIsTransformed());
+		WerewolfHelpers.transformEntity(playerIn, were, !were.getIsTransformed());
 		}
 		return super.onItemRightClick(worldIn, playerIn, handIn);
 	}

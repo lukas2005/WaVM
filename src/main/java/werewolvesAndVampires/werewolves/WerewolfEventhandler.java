@@ -1,9 +1,12 @@
 package werewolvesAndVampires.werewolves;
 
+import java.util.Iterator;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -11,7 +14,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -29,6 +31,8 @@ import werewolvesAndVampires.packets.PacketRegister;
 import werewolvesAndVampires.packets.SyncWerewolfCap;
 import werewolvesAndVampires.werewolves.capability.IWerewolf;
 import werewolvesAndVampires.werewolves.capability.WerewolfProvider;
+import werewolvesAndVampires.werewolves.capability.WerewolfType;
+import werewolvesAndVampires.werewolves.entity.WerewolfEntity;
 import werewolvesAndVampires.werewolves.rendering.WerewolfRenderPlayer;
 
 @Mod.EventBusSubscriber
@@ -41,11 +45,11 @@ public class WerewolfEventhandler {
 
 	@SubscribeEvent
 	public static void attachCapabilitys(AttachCapabilitiesEvent<Entity> e) {
-		if (e.getObject() instanceof EntityPlayer) {
+		if (e.getObject() instanceof EntityPlayer || e.getObject() instanceof EntityVillager) {
 			e.addCapability(werewolfCapLoc, new WerewolfProvider());
 		}
 	}
-	
+
 	@SideOnly(Side.CLIENT)
 	@SubscribeEvent
 	public static void renderPlayer(RenderPlayerEvent.Pre e) {
@@ -64,16 +68,16 @@ public class WerewolfEventhandler {
 		EntityPlayer p = e.player;
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
 		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime()
-				&& !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))
-				&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY, e.player.posZ))) {
+				&& !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 
-			if (!were.getIsTransformed()) {
-				WerewolfHelpers.TransformPlayer(p, were, true);
+			if (!were.getIsTransformed()
+					&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY + 1, e.player.posZ))) {
+				WerewolfHelpers.transformEntity(p, were, true);
 			}
 		} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 
 			if (were.getIsTransformed()) {
-				WerewolfHelpers.TransformPlayer(p, were, false);
+				WerewolfHelpers.transformEntity(p, were, false);
 			}
 		}
 
@@ -95,7 +99,7 @@ public class WerewolfEventhandler {
 		if (e.getEntityLiving() instanceof EntityPlayer && !e.getEntity().world.isRemote) {
 			EntityPlayer p = (EntityPlayer) e.getEntityLiving();
 			IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-			if (were.getIsTransformed() && e.getDistance() < 5) {
+			if (were.getIsTransformed() && e.getDistance() < 20) {
 				e.setCanceled(true);
 			}
 		}
@@ -114,15 +118,29 @@ public class WerewolfEventhandler {
 
 	@SubscribeEvent
 	public static void onDamage(LivingHurtEvent e) {
-		if (e.getEntityLiving() instanceof EntityPlayer && !e.getEntity().world.isRemote) {
-			EntityPlayer p = (EntityPlayer) e.getEntityLiving();
-			IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-			if (were.getIsTransformed()) {
+		if ((e.getEntityLiving() instanceof EntityPlayer || e.getEntityLiving() instanceof EntityVillager)
+				&& !e.getEntity().world.isRemote) {
+			IWerewolf were = e.getEntityLiving().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+			if(e.getSource().getTrueSource() == null)return;
+			Iterator<ItemStack> i = e.getSource().getTrueSource().getHeldEquipment().iterator();
+
+			boolean extraDamageItem = false;
+			while (i.hasNext()) {
+				ItemStack is = i.next();
+				if (is.getItem().getItemStackDisplayName(is).contains("gold"))
+					extraDamageItem = true;
+				if (is.getItem().getItemStackDisplayName(is).contains("Gold"))
+					extraDamageItem = true;
+			}
+
+			if (were.getIsTransformed() && !extraDamageItem) {
 				if (e.getAmount() < 4) {
 					e.setCanceled(true);
 				} else {
 					e.setAmount(e.getAmount() / 2);
 				}
+			} else if (extraDamageItem) {
+				e.setAmount(e.getAmount() + (e.getAmount() / 2));
 			}
 		}
 	}
@@ -131,9 +149,21 @@ public class WerewolfEventhandler {
 	public static void onJoin(EntityJoinWorldEvent e) {
 		if (e.getEntity() instanceof EntityPlayer && !e.getWorld().isRemote) {
 			PacketRegister.INSTANCE.sendTo(
-					new SyncWerewolfCap(
-							((EntityPlayerMP) e.getEntity()).getCapability(WerewolfProvider.WEREWOLF_CAP, null)),
-					((EntityPlayerMP) e.getEntity()));
+					new SyncWerewolfCap(((EntityPlayerMP) e.getEntity()).getCapability(WerewolfProvider.WEREWOLF_CAP, null), e.getEntity()), ((EntityPlayerMP) e.getEntity()));
+		}
+
+		if (!e.getWorld().isRemote && e.getEntity() instanceof EntityVillager && WerewolfHelpers.rand.nextDouble() > 0.5) {
+			WerewolfEntity werewolf = new WerewolfEntity(e.getWorld());
+			werewolf.setPosition(e.getEntity().posX, e.getEntity().posY, e.getEntity().posZ);
+			e.getWorld().spawnEntity(werewolf);
+			IWerewolf were = werewolf.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+			were.setWerewolfType(WerewolfType.FULL);
+			e.setCanceled(true);
+		}
+		
+		if (e.getEntity() instanceof EntityVillager && !e.getWorld().isRemote) {
+			PacketRegister.INSTANCE.sendToDimension(
+					new SyncWerewolfCap(e.getEntity().getCapability(WerewolfProvider.WEREWOLF_CAP, null), e.getEntity()), e.getEntity().dimension);
 		}
 	}
 
