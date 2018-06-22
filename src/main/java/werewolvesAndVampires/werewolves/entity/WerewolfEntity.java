@@ -130,6 +130,8 @@ public class WerewolfEntity extends EntityVillager {
 				WerewolfHelpers.transformEntity(this, were, false);
 		}
 	}
+	
+	
 
 	public class FindTargetWhenTransformed extends EntityAINearestAttackableTarget {
 
@@ -143,8 +145,14 @@ public class WerewolfEntity extends EntityVillager {
 					&& this.taskOwner.getCapability(WerewolfProvider.WEREWOLF_CAP, null).getIsTransformed()) {
 				return super.shouldExecute();
 			}
-			this.taskOwner.setAttackTarget(null);
 			return false;
+		}
+		
+		@Override
+		protected boolean isSuitableTarget(EntityLivingBase target, boolean includeInvincibles) {
+			if(target instanceof WerewolfEntity)
+				return false;
+			return super.isSuitableTarget(target, includeInvincibles);
 		}
 
 	}

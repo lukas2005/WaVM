@@ -21,9 +21,6 @@ public class WerewolfRenderPlayer extends RenderLivingBase<EntityPlayerSP> {
 	@Override
 	protected ResourceLocation getEntityTexture(EntityPlayerSP entity) {
 		IWerewolf were = entity.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if(were.getControlLevel() == ControlLevel.NONE || were.getControlLevel() == ControlLevel.LIMITED) {
-			return angryTexture;
-		}
 		return calmTexture;
 	}
 }
