@@ -82,7 +82,7 @@ public class WerewolfEventhandler {
 					&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY + 1, e.player.posZ))) {
 				WerewolfHelpers.transformEntity(p, were, true);
 			} else {
-				if (were.getBloodLust() == -1) {
+				/*if (were.getBloodLust() == -1) {
 					switch (e.player.world.getDifficulty().getDifficultyId()) {
 					case 0:
 						break;
@@ -117,7 +117,7 @@ public class WerewolfEventhandler {
 					were.setBloodLust(were.getBloodLust() - 1);
 				} else if (were.getBloodLust() == 0) {
 					WerewolfHelpers.loseControl(p);
-				}
+				}*/
 			}
 		} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 
