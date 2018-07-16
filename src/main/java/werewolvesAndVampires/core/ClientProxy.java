@@ -1,6 +1,9 @@
 package werewolvesAndVampires.core;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -14,11 +17,16 @@ public class ClientProxy extends CommonProxy {
 		super.preInit(e);
 		WVEntities.initRender();
 	}
-	
-	
+
+	@Override
+	public World getWorld() {
+		return Minecraft.getMinecraft().world;
+	}
+
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent event) {
 		WVItems.regModels();
 		WVBlocks.regModels();
 	}
+
 }

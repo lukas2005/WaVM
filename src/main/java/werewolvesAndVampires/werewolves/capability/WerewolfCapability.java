@@ -68,7 +68,7 @@ public class WerewolfCapability implements IWerewolf {
 		@Override
 		public NBTBase writeNBT(Capability<IWerewolf> capability, IWerewolf instance, EnumFacing side) {
 			NBTTagCompound nbt = new NBTTagCompound();
-			nbt.setInteger("werewolftype", instance.getWerewolfType().id);
+			nbt.setInteger("werewolftype", instance.getWerewolfType().ordinal());
 			nbt.setBoolean("transformed", instance.getIsTransformed());
 			nbt.setInteger("bloodLust", instance.getBloodLust());
 			nbt.setInteger("transformcount", instance.getTransformCount());
@@ -79,7 +79,7 @@ public class WerewolfCapability implements IWerewolf {
 		public void readNBT(Capability<IWerewolf> capability, IWerewolf instance, EnumFacing side, NBTBase nbt) {
 			if (nbt instanceof NBTTagCompound) {
 				NBTTagCompound nbtc = (NBTTagCompound) nbt;
-				instance.setWerewolfType(WerewolfType.getEnumFromId(nbtc.getInteger("werewolftype")));
+				instance.setWerewolfType(WerewolfType.byOrdinal(nbtc.getInteger("werewolftype")));
 				instance.setIsTransformed(nbtc.getBoolean("transformed"));
 				instance.setBloodLust(nbtc.getInteger("bloodLust"));
 				instance.setTransformCount(nbtc.getInteger("transformcount"));

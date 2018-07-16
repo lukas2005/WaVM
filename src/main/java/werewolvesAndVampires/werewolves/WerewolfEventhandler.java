@@ -1,31 +1,26 @@
 package werewolvesAndVampires.werewolves;
 
-import java.util.Iterator;
-import java.util.List;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -33,6 +28,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import werewolvesAndVampires.core.WVCore;
 import werewolvesAndVampires.core.WVItems;
+import werewolvesAndVampires.core.WVPotions;
 import werewolvesAndVampires.packets.PacketRegister;
 import werewolvesAndVampires.packets.SyncWerewolfCap;
 import werewolvesAndVampires.werewolves.capability.IWerewolf;
@@ -41,6 +37,8 @@ import werewolvesAndVampires.werewolves.capability.WerewolfType;
 import werewolvesAndVampires.werewolves.entity.EntityAngryPlayer;
 import werewolvesAndVampires.werewolves.entity.WerewolfEntity;
 import werewolvesAndVampires.werewolves.rendering.WerewolfRenderPlayer;
+
+import java.util.Iterator;
 
 @Mod.EventBusSubscriber
 public class WerewolfEventhandler {
@@ -72,14 +70,26 @@ public class WerewolfEventhandler {
 	}
 
 	@SubscribeEvent
+	public static void onPlayerClone(PlayerEvent.Clone e) {
+		if (e.isWasDeath()) {
+			PotionEffect effect = e.getOriginal().getActivePotionEffect(WVPotions.WW_FEVER);
+			if (effect != null) {
+				e.getEntityPlayer().addPotionEffect(effect);
+			}
+		}
+	}
+
+	@SubscribeEvent
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
+		//System.out.println(WerewolfHelpers.timeUntilFullMoon(e.player.world));
 		EntityPlayer p = e.player;
+		World world = p.world;
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime()
-				&& !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
+		if (e.side.isServer() && world.getCurrentMoonPhaseFactor() == 1F && WerewolfHelpers.timeUntilFullMoon(world) == 0
+				&& !p.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 
 			if (!were.getIsTransformed()
-					&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY + 1, e.player.posZ))) {
+					&& p.world.canBlockSeeSky(new BlockPos(p.posX, p.posY + 1, p.posZ))) {
 				WerewolfHelpers.transformEntity(p, were, true);
 			} else {
 				/*if (were.getBloodLust() == -1) {
@@ -128,14 +138,22 @@ public class WerewolfEventhandler {
 
 		if (were.getIsTransformed()) {
 			p.stepHeight = 1.25F;
-			p.addPotionEffect(new PotionEffect(Potion.getPotionById(16), 300, 0, false, false));
+			p.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 300, 0, false, false));
 			p.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(8);
 			p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.15000000149011612D);
 		} else {
 			p.stepHeight = 0.6F;
-			p.removePotionEffect(Potion.getPotionById(16));
+			p.removePotionEffect(MobEffects.NIGHT_VISION);
 			p.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1);
 			p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.10000000149011612D);
+		}
+
+		if (were.getWerewolfType() == WerewolfType.INFECTED) {
+			if (p.getActivePotionEffect(WVPotions.WW_FEVER) == null)
+				p.addPotionEffect(new PotionEffect(WVPotions.WW_FEVER, 2*20, 0, false, false));
+		} else {
+			if (p.getActivePotionEffect(WVPotions.WW_FEVER) != null)
+				p.removePotionEffect(WVPotions.WW_FEVER);
 		}
 	}
 
@@ -193,7 +211,7 @@ public class WerewolfEventhandler {
 	public static void onJoin(EntityJoinWorldEvent e) {
 		if (e.getEntity() instanceof EntityPlayer && !e.getWorld().isRemote) {
 			PacketRegister.INSTANCE.sendTo(new SyncWerewolfCap(
-					((EntityPlayerMP) e.getEntity()).getCapability(WerewolfProvider.WEREWOLF_CAP, null), e.getEntity()),
+					e.getEntity().getCapability(WerewolfProvider.WEREWOLF_CAP, null), e.getEntity()),
 					((EntityPlayerMP) e.getEntity()));
 		}
 

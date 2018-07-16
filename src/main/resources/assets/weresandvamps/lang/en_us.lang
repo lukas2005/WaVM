@@ -1,5 +1,8 @@
 item.weresandvamps.werewolf_totem.name=Werewolf Totem
 item.weresandvamps.wolfsbane_dust.name=Wolfsbane Dust
+item.weresandvamps.nether_apple.name=Nether Apple
 
 tile.weresandvamps.wolfsbane.name=Wolfsbane
 tile.weresandvamps.wolfsbane_cake.name=Wolfsbane Cake
+
+potion.weresandvamps.ww_fever=Howling Fever

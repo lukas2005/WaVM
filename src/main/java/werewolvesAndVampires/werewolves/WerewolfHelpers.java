@@ -6,8 +6,11 @@ import java.util.Random;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import werewolvesAndVampires.core.WVPotions;
 import werewolvesAndVampires.packets.PacketRegister;
 import werewolvesAndVampires.packets.SyncWerewolfCap;
 import werewolvesAndVampires.werewolves.capability.IWerewolf;
@@ -15,7 +18,7 @@ import werewolvesAndVampires.werewolves.entity.EntityAngryPlayer;
 
 public class WerewolfHelpers {
 	public static Random rand = new Random();
-	public static Map<String,Integer> playerTowereform = new HashMap<String,Integer>();
+	public static Map<String,Integer> playerToWereForm = new HashMap<String,Integer>();
 	
 	public static void transformEntity(EntityLivingBase p, IWerewolf were, boolean transform) {
 		were.setIsTransformed(transform);
@@ -34,7 +37,8 @@ public class WerewolfHelpers {
 		}else {
 			p.setEntityBoundingBox(p.getEntityBoundingBox().contract(0, 1, 0));
 		}
-			
+
+		p.addPotionEffect(new PotionEffect(WVPotions.WW_HANGOVER, 30, 0, false, false));
 	}
 	
 	public static void loseControl(EntityPlayer p) {
@@ -43,7 +47,20 @@ public class WerewolfHelpers {
 	}
 	
 	public static void gainControl(EntityPlayer p) {
-		p.world.getEntityByID(playerTowereform.get(p.getName())).setDead();
+		p.world.getEntityByID(playerToWereForm.get(p.getName())).setDead();
 	}
-	
+
+	public static long timeUntilFullMoon(World world) {
+		if (world != null) {
+			long worldTime = world.getWorldTime();
+
+			MoonPhase moonPhase = MoonPhase.byOrdinal(world.getMoonPhase());
+
+			long timeSinceBeginningOfDay = (long) (worldTime - Math.floor(worldTime / 24000) * 24000);
+			long timeUntilMoonRises = 12566 - timeSinceBeginningOfDay;
+
+			return moonPhase == MoonPhase.FULL ? (timeUntilMoonRises < 0 ? 0 : timeUntilMoonRises) : (moonPhase.getDaysToFullMoon() * 24000 + (24000 - 12566)) - timeSinceBeginningOfDay;
+		}
+		return  1;
+	}
 }
