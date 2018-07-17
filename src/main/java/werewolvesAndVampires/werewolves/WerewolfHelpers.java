@@ -26,19 +26,19 @@ public class WerewolfHelpers {
 		WorldServer ws = (WorldServer) p.world;
 		int i = 0;
 		while (i < 450) {
-			ws.spawnParticle(EnumParticleTypes.CLOUD, p.posX + rand.nextGaussian(),
-					p.posY + rand.nextGaussian(), p.posZ + rand.nextGaussian(), 1, 0, 1, 0, 0,
-					null);
+//			ws.spawnParticle(EnumParticleTypes.CLOUD, p.posX + rand.nextGaussian(),
+//					p.posY + rand.nextGaussian(), p.posZ + rand.nextGaussian(), 1, 0, 1, 0, 0,
+//					null);
 			++i;
 		}
-		
-		if(were.getIsTransformed()) {
-			p.setEntityBoundingBox(p.getEntityBoundingBox().expand(0, 1, 0));
-		}else {
-			p.setEntityBoundingBox(p.getEntityBoundingBox().contract(0, 1, 0));
+
+		if (transform) {
+			p.height = 3;
+		} else {
+			p.height = 2;
 		}
 
-		p.addPotionEffect(new PotionEffect(WVPotions.WW_HANGOVER, 30, 0, false, false));
+		p.addPotionEffect(new PotionEffect(WVPotions.WW_HANGOVER, 1, 0, false, false));
 	}
 	
 	public static void loseControl(EntityPlayer p) {

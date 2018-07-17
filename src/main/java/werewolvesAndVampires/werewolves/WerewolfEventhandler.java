@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import werewolvesAndVampires.core.WVBlocks;
 import werewolvesAndVampires.core.WVCore;
 import werewolvesAndVampires.core.WVItems;
 import werewolvesAndVampires.core.WVPotions;
@@ -80,16 +81,21 @@ public class WerewolfEventhandler {
 	}
 
 	@SubscribeEvent
+	public static void livingTick(LivingEvent.LivingUpdateEvent e) {
+	}
+
+	@SubscribeEvent
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
 		//System.out.println(WerewolfHelpers.timeUntilFullMoon(e.player.world));
 		EntityPlayer p = e.player;
 		World world = p.world;
+		BlockPos pos = p.getPosition();
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
 		if (e.side.isServer() && world.getCurrentMoonPhaseFactor() == 1F && WerewolfHelpers.timeUntilFullMoon(world) == 0
 				&& !p.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 
 			if (!were.getIsTransformed()
-					&& p.world.canBlockSeeSky(new BlockPos(p.posX, p.posY + 1, p.posZ))) {
+					&& p.world.canBlockSeeSky(pos.up())) {
 				WerewolfHelpers.transformEntity(p, were, true);
 			} else {
 				/*if (were.getBloodLust() == -1) {
@@ -129,11 +135,8 @@ public class WerewolfEventhandler {
 					WerewolfHelpers.loseControl(p);
 				}*/
 			}
-		} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
-
-			if (were.getIsTransformed()) {
-				WerewolfHelpers.transformEntity(p, were, false);
-			}
+		} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem)) && world.isDaytime() && world.getWorldTime() <= 600 && were.getIsTransformed()) {
+			WerewolfHelpers.transformEntity(p, were, false);
 		}
 
 		if (were.getIsTransformed()) {
@@ -155,6 +158,16 @@ public class WerewolfEventhandler {
 			if (p.getActivePotionEffect(WVPotions.WW_FEVER) != null)
 				p.removePotionEffect(WVPotions.WW_FEVER);
 		}
+
+//		if (world.getBlockState(pos).getBlock().equals(WVBlocks.wolfsbane_dust)) {
+//			if (were.getWerewolfType() == WerewolfType.FULL) {
+//				if (were.getIsTransformed()) {
+//					p.setPositionAndUpdate(p.prevPosX, p.posY, p.prevPosZ);
+//				} else {
+//					WerewolfHelpers.transformEntity(p, were, !were.getIsTransformed());
+//				}
+//			}
+//		}
 	}
 
 	@SubscribeEvent
