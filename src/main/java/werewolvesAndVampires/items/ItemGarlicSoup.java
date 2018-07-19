@@ -16,7 +16,6 @@ public class ItemGarlicSoup extends ItemSoup {
 		super(5);
 		setRegistryName("garlic_soup");
 		setUnlocalizedName(WVCore.MODID + ".garlic_soup");
-		setCreativeTab(WVCore.ctab);
 	}
 
 	@Override
