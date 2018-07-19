@@ -2,6 +2,7 @@ package werewolvesAndVampires.core;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
@@ -26,6 +27,13 @@ public class WVRecipes {
 				'W', Items.NETHER_WART,
 				'S', Items.NETHER_STAR,
 				'A', Items.APPLE
+		);
+
+		GameRegistry.addShapelessRecipe(new ResourceLocation(WVCore.MODID, "garlic_soup"), null, new ItemStack(WVItems.garlic_soup),
+				Ingredient.fromItem(WVItems.garlic),
+				Ingredient.fromItem(WVItems.garlic),
+				Ingredient.fromItem(WVItems.garlic),
+				Ingredient.fromItem(Items.BOWL)
 		);
 	}
 	

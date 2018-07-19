@@ -9,6 +9,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
@@ -20,6 +21,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import werewolvesAndVampires.WorldTimeQueue;
+import werewolvesAndVampires.core.WVBlocks;
 import werewolvesAndVampires.core.WVItems;
 import werewolvesAndVampires.werewolves.WerewolfHelpers;
 import werewolvesAndVampires.werewolves.capability.IWerewolf;
@@ -65,6 +67,61 @@ public class BlockWolfsbaneDust extends BaseBlock {
 
 	}
 
+
+	@SideOnly(Side.CLIENT)
+	@Override
+	public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand) {
+//		EntityPlayer player = worldIn.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 2, p -> {
+//			IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+//			return were != null && were.getWerewolfType() == WerewolfType.FULL;
+//		});
+//
+//		if (player != null) {
+//
+//			boolean flag  = false;
+//			boolean flag1 = false;
+//			boolean flag3 = false;
+//
+//			stateIn = stateIn.getActualState(worldIn, pos);
+//
+//			EnumAttachPosition north = stateIn.getValue(NORTH);
+//			EnumAttachPosition south = stateIn.getValue(SOUTH);
+//			EnumAttachPosition west  = stateIn.getValue(WEST);
+//			EnumAttachPosition east  = stateIn.getValue(EAST);
+//
+//			if (north == EnumAttachPosition.SIDE && south == EnumAttachPosition.SIDE && west == EnumAttachPosition.SIDE && east == EnumAttachPosition.SIDE) {
+//				flag3 = true;
+//			} if (north == EnumAttachPosition.SIDE || south == EnumAttachPosition.SIDE) {
+//				flag1 = true;
+//			} else if (west == EnumAttachPosition.SIDE || east == EnumAttachPosition.SIDE) {
+//				flag = true;
+//			}
+//
+//			int i = 0;
+//			while (i < 10) {
+//				if (flag3) {
+//					worldIn.spawnParticle(EnumParticleTypes.FALLING_DUST,
+//							pos.getX()+(i*0.1), pos.getY()+1, pos.getZ()+0.5,
+//							0, 0, 0,
+//							Block.getStateId(WVBlocks.wolfsbane_dust.getDefaultState()));
+//					worldIn.spawnParticle(EnumParticleTypes.FALLING_DUST,
+//							pos.getX()+0.5, pos.getY()+1, pos.getZ()+(i*0.1),
+//							0, 0, 0,
+//							Block.getStateId(WVBlocks.wolfsbane_dust.getDefaultState()));
+//				} else {
+//					worldIn.spawnParticle(EnumParticleTypes.FALLING_DUST,
+//							pos.getX() + (flag ? (i * 0.1) : 0.5), pos.getY() + 1, pos.getZ() + (flag1 ? (i * 0.1) : 0.5),
+//							0, 0, 0,
+//							Block.getStateId(WVBlocks.wolfsbane_dust.getDefaultState()));
+//				}
+//
+//				++i;
+//			}
+//
+//		}
+	}
+
+
 	@Override
 	public void onEntityCollidedWithBlock(World world, BlockPos pos, IBlockState state, Entity entity) {
 		if (!world.isRemote && entity instanceof EntityLivingBase) {
@@ -84,7 +141,6 @@ public class BlockWolfsbaneDust extends BaseBlock {
 				}
 
 				if (were.getIsTransformed() || transforms) {
-					transforms = false;
 					Vec3d block = new Vec3d(pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D);
 					Vec3d direction = block.subtract(entity.getPositionVector());
 
@@ -92,7 +148,6 @@ public class BlockWolfsbaneDust extends BaseBlock {
 
 					entity.addVelocity(-direction.x, -direction.y, -direction.z);
 					entity.velocityChanged = true;
-
 				}
 			}
 		}

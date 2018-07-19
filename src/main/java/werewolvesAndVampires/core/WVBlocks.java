@@ -6,6 +6,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 import net.minecraftforge.registries.IForgeRegistry;
+import werewolvesAndVampires.blocks.BlockGarlicCrop;
 import werewolvesAndVampires.blocks.BlockWolfsbane;
 import werewolvesAndVampires.blocks.BlockWolfsbaneCake;
 import werewolvesAndVampires.blocks.BlockWolfsbaneDust;
@@ -18,13 +19,16 @@ public class WVBlocks {
 	public static BlockWolfsbane wolfsbane = new BlockWolfsbane();
 	public static BlockWolfsbaneDust wolfsbane_dust = new BlockWolfsbaneDust();
 
+	//Crops
+	public static BlockGarlicCrop garlic_crop = new BlockGarlicCrop();
 
 	public static void regBlocks(RegistryEvent.Register<Block> event) {
 		IForgeRegistry<Block> reg = event.getRegistry();
 		reg.registerAll(
 				wolfsbane,
 				wolfsbane_cake,
-				wolfsbane_dust
+				wolfsbane_dust,
+				garlic_crop
 		);
 	}
 	
