@@ -16,7 +16,7 @@ public class WVItems {
 	// Food
 	public static BaseItemFood nether_apple = new ItemNetherApple();
 	public static ItemGarlic garlic = new ItemGarlic();
-	public static BaseItemFood garlic_soup = new ItemGarlicSoup();
+	public static ItemGarlicSoup garlic_soup = new ItemGarlicSoup();
 
 	// Test items
 	public static BaseItem ww_test_item = new WWTestItem();
@@ -28,7 +28,8 @@ public class WVItems {
 				werewolf_totem,
 				wolfsbane_dust,
 				nether_apple,
-				garlic
+				garlic,
+				garlic_soup
 		);
 
 		// Test items
@@ -43,6 +44,7 @@ public class WVItems {
 
 		nether_apple.regModel();
 		garlic.regModel();
+		garlic_soup.regModel();
 	}
 	
 }
