@@ -1,7 +1,7 @@
 package werewolvesAndVampires.werewolves;
 
-import javafx.scene.chart.Axis;
 import java.util.Iterator;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
@@ -25,19 +25,15 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.terraingen.PopulateChunkEvent;
+import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import werewolvesAndVampires.WorldTimeQueue;
-import werewolvesAndVampires.core.WVBlocks;
 import werewolvesAndVampires.core.WVCore;
 import werewolvesAndVampires.core.WVItems;
 import werewolvesAndVampires.core.WVPotions;
@@ -49,9 +45,6 @@ import werewolvesAndVampires.werewolves.capability.WerewolfType;
 import werewolvesAndVampires.werewolves.entity.EntityAngryPlayer;
 import werewolvesAndVampires.werewolves.entity.WerewolfEntity;
 import werewolvesAndVampires.werewolves.rendering.WerewolfRenderPlayer;
-
-import java.util.Iterator;
-import java.util.List;
 
 @Mod.EventBusSubscriber
 public class WerewolfEventhandler {
@@ -73,13 +66,15 @@ public class WerewolfEventhandler {
 	@SubscribeEvent
 	public static void renderPlayer(RenderPlayerEvent.Pre e) {
 		IWerewolf were = e.getEntityPlayer().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if (were.getIsTransformed() || false) {
+		if (were.getIsTransformed() && Minecraft.getMinecraft().getRenderViewEntity() == e.getEntityPlayer()) {
 			e.setCanceled(true);
 			if (wereRender == null)
 				wereRender = new WerewolfRenderPlayer(Minecraft.getMinecraft().getRenderManager());
 
 			wereRender.doRender((EntityPlayerSP) e.getEntityPlayer(), e.getX(), e.getY(), e.getZ(),
 					e.getEntityPlayer().rotationYaw, e.getPartialRenderTick());
+		}else if(were.getIsTransformed()) {
+			e.setCanceled(true);
 		}
 	}
 
