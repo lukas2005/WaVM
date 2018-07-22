@@ -1,6 +1,7 @@
 package werewolvesAndVampires.werewolves;
 
 import javafx.scene.chart.Axis;
+import java.util.Iterator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
@@ -16,14 +17,20 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.GetCollisionBoxesEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -66,12 +73,36 @@ public class WerewolfEventhandler {
 	@SubscribeEvent
 	public static void renderPlayer(RenderPlayerEvent.Pre e) {
 		IWerewolf were = e.getEntityPlayer().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if (were.getIsTransformed()) {
+		if (were.getIsTransformed() || false) {
 			e.setCanceled(true);
 			if (wereRender == null)
 				wereRender = new WerewolfRenderPlayer(Minecraft.getMinecraft().getRenderManager());
+
 			wereRender.doRender((EntityPlayerSP) e.getEntityPlayer(), e.getX(), e.getY(), e.getZ(),
 					e.getEntityPlayer().rotationYaw, e.getPartialRenderTick());
+		}
+	}
+
+	public static Entity cam = null;
+
+	@SubscribeEvent
+	public static void onPreRender(RenderGameOverlayEvent.Pre e) {
+		if (cam != null) {
+			Minecraft.getMinecraft().setRenderViewEntity(cam); 
+		} else {
+			Minecraft.getMinecraft().setRenderViewEntity(Minecraft.getMinecraft().player);
+		}
+	}
+
+	@SubscribeEvent
+	public static void copy(PlayerEvent.Clone e) {
+		if (e.isWasDeath()) {
+			IWerewolf were = e.getEntityPlayer().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+			IWerewolf old = e.getOriginal().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+			were.setBloodLust(old.getBloodLust());
+			were.setIsTransformed(old.getIsTransformed());
+			were.setWerewolfType(old.getWerewolfType());
+			were.setTransformCount(old.getTransformCount());
 		}
 	}
 
@@ -97,60 +128,17 @@ public class WerewolfEventhandler {
 		BlockPos pos = p.getPosition();
 
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if (e.phase == TickEvent.Phase.START) {
-			if (!world.isRemote) {
-				if (world.getCurrentMoonPhaseFactor() == 1F &&
-						WerewolfHelpers.timeUntilFullMoon(world) == 0 &&
-						!p.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
+		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime()
+				&& !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))
+				&& were.getWerewolfType() == WerewolfType.FULL) {
 
-					if (!were.getIsTransformed()
-							&& p.world.canBlockSeeSky(pos.up())) {
-						WerewolfHelpers.transformEntity(p, were, true);
-						WorldTimeQueue.scheduleFor(0, () -> WerewolfHelpers.transformEntity(p, were, false));
-					} else {
-				/*if (were.getBloodLust() == -1) {
-					switch (e.player.world.getDifficulty().getDifficultyId()) {
-					case 0:
-						break;
-					case 1:
-						List<Entity> list = e.player.world
-								.getEntitiesInAABBexcluding(
-										e.player, new AxisAlignedBB(e.player.posX, e.player.posY, e.player.posZ,
-												e.player.posX, e.player.posY, e.player.posZ).grow(10),
-										EntitySelectors.NOT_SPECTATING);
-						if (!list.isEmpty())
-							were.setBloodLust(0);
-						break;
-					case 2:
-						List<Entity> list2 = e.player.world
-								.getEntitiesInAABBexcluding(
-										e.player, new AxisAlignedBB(e.player.posX, e.player.posY, e.player.posZ,
-												e.player.posX, e.player.posY, e.player.posZ).grow(10),
-										EntitySelectors.NOT_SPECTATING);
-						if (!list2.isEmpty())
-							were.setBloodLust(0);
-						if (list2.isEmpty())
-							were.setBloodLust(3600);
-						// TODO Decrement each tick and do control logic
-						break;
-					case 3:
-						were.setBloodLust(0);
-						break;
-					default:
-						break;
-					}
-				} else if (were.getBloodLust() > 1) {
-					were.setBloodLust(were.getBloodLust() - 1);
-				} else if (were.getBloodLust() == 0) {
-					WerewolfHelpers.loseControl(p);
-				}*/
-					}
-				}
-// else if (!p.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem)) && world.isDaytime() && world.getWorldTime() <= 600 && were.getIsTransformed()) {
-//					WerewolfHelpers.transformEntity(p, were, false);
-//				}
+			if (!were.getIsTransformed()
+					&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY + 1, e.player.posZ))) {
+				WerewolfHelpers.transformEntity(p, were, true);
+			} else {
+				WerewolfHelpers.controlTick(e, were);
 			}
-
+		} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 			if (were.getIsTransformed()) {
 				p.stepHeight = 1.25F;
 				p.eyeHeight  = 1.97F;
@@ -171,6 +159,9 @@ public class WerewolfEventhandler {
 			} else {
 				if (p.getActivePotionEffect(WVPotions.WW_FEVER) != null)
 					p.removePotionEffect(WVPotions.WW_FEVER);
+			}
+			if (were.getWerewolfType() == WerewolfType.INFECTED) {
+				were.setWerewolfType(WerewolfType.FULL);
 			}
 		}
 	}
@@ -227,7 +218,7 @@ public class WerewolfEventhandler {
 					extraDamageItem = true;
 			}
 
-			if (were.getIsTransformed() && !extraDamageItem) {
+			if (were.getIsTransformed() && !extraDamageItem && were.getWerewolfType() == WerewolfType.FULL) {
 				if (e.getAmount() < 4) {
 					e.setCanceled(true);
 				} else {
@@ -265,4 +256,30 @@ public class WerewolfEventhandler {
 		}
 	}
 
+	static String[] poss = new String[] { "hoowl ", "aarf ", "grrr " };
+
+	@SubscribeEvent
+	public static void chatEvent(ServerChatEvent e) {
+		IWerewolf were = e.getPlayer().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+		if (were.getIsTransformed() && were.getWerewolfType() == WerewolfType.FULL) {
+			e.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent
+	public static void interact(PlayerInteractEvent.RightClickBlock e) {
+		IWerewolf were = e.getEntityPlayer().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+		if (were.getIsTransformed() && were.getWerewolfType() == WerewolfType.FULL) {
+			e.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent
+	public static void pickupEvent(EntityItemPickupEvent e) {
+		IWerewolf were = e.getEntityPlayer().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+		if (were.getIsTransformed() && e.getItem().getItem().getItem() != WVItems.werewolf_totem
+				&& were.getWerewolfType() == WerewolfType.FULL) {
+			e.setCanceled(true);
+		}
+	}
 }
