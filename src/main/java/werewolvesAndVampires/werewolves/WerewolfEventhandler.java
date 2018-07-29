@@ -99,7 +99,8 @@ public class WerewolfEventhandler {
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
 		if (e.phase == TickEvent.Phase.START) {
 			if (!world.isRemote) {
-				if (world.getCurrentMoonPhaseFactor() == 1F &&
+				if (were.getWerewolfType() == WerewolfType.FULL &&
+						world.getCurrentMoonPhaseFactor() == 1F &&
 						WerewolfHelpers.timeUntilFullMoon(world) == 0 &&
 						!p.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 
