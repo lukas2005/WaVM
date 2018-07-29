@@ -1,7 +1,5 @@
 package werewolvesAndVampires.werewolves.capability;
 
-import java.util.concurrent.Callable;
-
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -12,11 +10,13 @@ public class WerewolfCapability implements IWerewolf {
 
 	private boolean isTransformed = false;
 
-	private int bloodLust = -1;
+	private int bloodLust = 0;
 
 	private int transformCount = 0;
 
 	private WerewolfType werewolfType = WerewolfType.NONE;
+	
+	private int entityID = 0;
 
 	@Override
 	public boolean getIsTransformed() {
@@ -63,6 +63,16 @@ public class WerewolfCapability implements IWerewolf {
 		werewolfType = wwt;
 	}
 
+	@Override
+	public void setEntity(int id) {
+		entityID = id;
+	}
+
+	@Override
+	public int getEntity() {
+		return entityID;
+	}
+	
 	private static class WerewolfStorage implements Capability.IStorage<IWerewolf> {
 
 		@Override
@@ -72,6 +82,7 @@ public class WerewolfCapability implements IWerewolf {
 			nbt.setBoolean("transformed", instance.getIsTransformed());
 			nbt.setInteger("bloodLust", instance.getBloodLust());
 			nbt.setInteger("transformcount", instance.getTransformCount());
+			nbt.setInteger("eid", instance.getEntity());
 			return nbt;
 		}
 
@@ -83,6 +94,7 @@ public class WerewolfCapability implements IWerewolf {
 				instance.setIsTransformed(nbtc.getBoolean("transformed"));
 				instance.setBloodLust(nbtc.getInteger("bloodLust"));
 				instance.setTransformCount(nbtc.getInteger("transformcount"));
+				instance.setEntity(nbtc.getInteger("eid"));
 			}
 		}
 	}
