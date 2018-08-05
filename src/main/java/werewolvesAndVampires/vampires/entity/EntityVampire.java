@@ -19,6 +19,7 @@ import net.minecraft.village.Village;
 import net.minecraft.village.VillageDoorInfo;
 import net.minecraft.world.World;
 import werewolvesAndVampires.utils.MathUtils;
+import werewolvesAndVampires.vampires.entity.ai.AIVampireAvoidSun;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -54,12 +55,14 @@ public class EntityVampire extends EntityAgeable {
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityEvoker.class, 12.0F, 0.8D, 0.8D));
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityVindicator.class, 8.0F, 0.8D, 0.8D));
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityVex.class, 8.0F, 0.6D, 0.6D));
-        this.tasks.addTask(3, new EntityVampire.AIVampireMoveIndoors(this));
-        this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
-        this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
-        this.tasks.addTask(6, new EntityVampire.AIVampireTarget(this, EntityPlayer.class));
-        this.tasks.addTask(7, new EntityVampire.AIVampireTarget(this, EntityVillager.class));
-        this.tasks.addTask(8, new EntityVampire.AIVampireWander(this, 0.6D)); // TODO: This still needs more development
+        this.tasks.addTask(2, new AIVampireAvoidSun(this, 0.6D));
+        this.tasks.addTask(3, new EntityAIWander(this, 0.6D));
+//        this.tasks.addTask(3, new EntityVampire.AIVampireMoveIndoors(this));
+//        this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
+        this.tasks.addTask(4, new EntityVampire.AIVampireTarget(this, EntityPlayer.class));
+        this.tasks.addTask(5, new EntityVampire.AIVampireTarget(this, EntityVillager.class));
+        this.tasks.addTask(6, new EntityAIOpenDoor(this, true));
+
     }
 
     @Override
@@ -103,7 +106,8 @@ public class EntityVampire extends EntityAgeable {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         if (this.world.isDaytime() && !this.world.isRemote && this.shouldBurnInDay() && world.canSeeSky(this.getPosition())) {
-            this.setFire(8);
+            float f = this.world.getDifficultyForLocation(new BlockPos(this)).getAdditionalDifficulty();
+            this.setFire(2 * (int) f);
         }
     }
 
@@ -143,101 +147,6 @@ public class EntityVampire extends EntityAgeable {
         public boolean shouldExecute() {
             float f = this.taskOwner.getBrightness();
             return true;//f < 0.5F && super.shouldExecute();
-        }
-    }
-
-    static class AIVampireMoveIndoors extends EntityAIBase {
-        private final EntityCreature entity;
-        private VillageDoorInfo doorInfo;
-        private int insidePosX = -1;
-        private int insidePosZ = -1;
-
-        public AIVampireMoveIndoors(EntityCreature entityIn)
-        {
-            this.entity = entityIn;
-            this.setMutexBits(1);
-        }
-
-        /**
-         * Returns whether the EntityAIBase should begin execution.
-         */
-        public boolean shouldExecute()
-        {
-            BlockPos blockpos = new BlockPos(this.entity);
-
-            if ((this.entity.world.isDaytime() || this.entity.world.isRaining() && !this.entity.world.getBiome(blockpos).canRain()) && this.entity.world.provider.hasSkyLight())
-            {
-                if (this.entity.getRNG().nextInt(50) != 0)
-                {
-                    return false;
-                }
-                else if (this.insidePosX != -1 && this.entity.getDistanceSq((double)this.insidePosX, this.entity.posY, (double)this.insidePosZ) < 4.0D)
-                {
-                    return false;
-                }
-                else
-                {
-                    Village village = this.entity.world.getVillageCollection().getNearestVillage(blockpos, 14);
-
-                    if (village == null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        this.doorInfo = village.getDoorInfo(blockpos);
-                        return this.doorInfo != null;
-                    }
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /**
-         * Returns whether an in-progress EntityAIBase should continue executing
-         */
-        public boolean shouldContinueExecuting()
-        {
-            return !this.entity.getNavigator().noPath();
-        }
-
-        /**
-         * Execute a one shot task or start executing a continuous task
-         */
-        public void startExecuting()
-        {
-            this.insidePosX = -1;
-            BlockPos blockpos = this.doorInfo.getInsideBlockPos();
-            int i = blockpos.getX();
-            int j = blockpos.getY();
-            int k = blockpos.getZ();
-
-            if (this.entity.getDistanceSq(blockpos) > 256.0D)
-            {
-                Vec3d vec3d = RandomPositionGenerator.findRandomTargetBlockTowards(this.entity, 14, 3, new Vec3d((double)i + 0.5D, (double)j, (double)k + 0.5D));
-
-                if (vec3d != null)
-                {
-                    this.entity.getNavigator().tryMoveToXYZ(vec3d.x, vec3d.y, vec3d.z, 1.0D);
-                }
-            }
-            else
-            {
-                this.entity.getNavigator().tryMoveToXYZ((double)i + 0.5D, (double)j, (double)k + 0.5D, 1.0D);
-            }
-        }
-
-        /**
-         * Reset the task's internal state. Called when this task is interrupted by another one
-         */
-        public void resetTask()
-        {
-            this.insidePosX = this.doorInfo.getInsideBlockPos().getX();
-            this.insidePosZ = this.doorInfo.getInsideBlockPos().getZ();
-            this.doorInfo = null;
         }
     }
 
