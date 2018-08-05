@@ -6,6 +6,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import werewolvesAndVampires.werewolves.WerewolfHelpers;
 import werewolvesAndVampires.werewolves.capability.IWerewolf;
 import werewolvesAndVampires.werewolves.capability.WerewolfProvider;
 import werewolvesAndVampires.werewolves.capability.WerewolfType;
@@ -25,6 +26,7 @@ public class WWTestItem extends BaseItem {
 			were.setWerewolfType(WerewolfType.INFECTED);
 		} else {
 			were.setWerewolfType(WerewolfType.NONE);
+			if (!worldIn.isRemote)WerewolfHelpers.transformEntity(playerIn, were, false);
 		}
 
 		return ActionResult.newResult(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));

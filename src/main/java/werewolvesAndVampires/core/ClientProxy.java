@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -11,6 +12,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import werewolvesAndVampires.blocks.BlockWolfsbaneDust;
+import werewolvesAndVampires.tileentity.TileEntityCoffin;
+import werewolvesAndVampires.tileentity.tesr.TileEntitySpecialRendererCoffin;
 
 import java.awt.*;
 
@@ -29,6 +32,8 @@ public class ClientProxy extends CommonProxy {
 
 		BlockColors colors = Minecraft.getMinecraft().getBlockColors();
 		colors.registerBlockColorHandler((state, worldIn, pos, tintIndex) -> 0xAA8FC4, WVBlocks.wolfsbane_dust);
+
+		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCoffin.class, new TileEntitySpecialRendererCoffin());
 	}
 
 	@Override

@@ -40,7 +40,7 @@ public class CommonProxy {
 
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
-	WVBlocks.regBlocks(event);
+		WVBlocks.regBlocks(event);
     }
 
 }

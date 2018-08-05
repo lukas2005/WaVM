@@ -16,7 +16,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.ServerChatEvent;
@@ -105,42 +105,47 @@ public class WerewolfEventhandler {
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
 		//System.out.println(WerewolfHelpers.timeUntilFullMoon(e.player.world));
 		EntityPlayer p = e.player;
-
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime()
-				&& !WerewolfHelpers.doesPlayerHaveTotem(e.player)
-				&& were.getWerewolfType() == WerewolfType.FULL) {
+		World world = p.world;
+		if (e.phase == TickEvent.Phase.START) {
+			if (!world.isRemote) {
+				if (were.getWerewolfType() == WerewolfType.FULL &&
+						world.getCurrentMoonPhaseFactor() == 1F &&
+						WerewolfHelpers.timeUntilFullMoon(world) == 0 &&
+						!p.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
 
-			if (!were.getIsTransformed()
-					&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY + 1, e.player.posZ))) {
-				WerewolfHelpers.transformEntity(p, were, true);
-			} else {
-				WerewolfHelpers.controlTick(e, were);
-			}
-		} else if (e.side.isServer() && !WerewolfHelpers.doesPlayerHaveTotem(e.player)) {
-			if (were.getIsTransformed()) {
-				p.stepHeight = 1.25F;
-				p.eyeHeight  = 1.97F;
-				p.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 300, 0, false, false));
-				p.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(8);
-				//p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.15000000149011612D);
-			} else {
-				p.stepHeight = 0.6F;
-				p.eyeHeight  = p.getDefaultEyeHeight();
-				p.removePotionEffect(MobEffects.NIGHT_VISION);
-				p.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1);
-				p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.10000000149011612D);
-			}
+					if (!were.getIsTransformed()
+							&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY + 1, e.player.posZ))) {
+						WerewolfHelpers.transformEntity(p, were, true);
+					} else {
+						WerewolfHelpers.controlTick(e, were);
+					}
+				} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
+					if (were.getIsTransformed()) {
+						p.stepHeight = 1.25F;
+						p.eyeHeight = 1.97F;
+						p.addPotionEffect(new PotionEffect(MobEffects.NIGHT_VISION, 300, 0, false, false));
+						p.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(8);
+						//p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.15000000149011612D);
+					} else {
+						p.stepHeight = 0.6F;
+						p.eyeHeight = p.getDefaultEyeHeight();
+						p.removePotionEffect(MobEffects.NIGHT_VISION);
+						p.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1);
+						p.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.10000000149011612D);
+					}
 
-			if (were.getWerewolfType() == WerewolfType.INFECTED) {
-				if (p.getActivePotionEffect(WVPotions.WW_FEVER) == null)
-					p.addPotionEffect(new PotionEffect(WVPotions.WW_FEVER, 2 * 20, 0, false, false));
-			} else {
-				if (p.getActivePotionEffect(WVPotions.WW_FEVER) != null)
-					p.removePotionEffect(WVPotions.WW_FEVER);
-			}
-			if (were.getWerewolfType() == WerewolfType.INFECTED) {
-				were.setWerewolfType(WerewolfType.FULL);
+					if (were.getWerewolfType() == WerewolfType.INFECTED) {
+						if (p.getActivePotionEffect(WVPotions.WW_FEVER) == null)
+							p.addPotionEffect(new PotionEffect(WVPotions.WW_FEVER, 2 * 20, 0, false, false));
+					} else {
+						if (p.getActivePotionEffect(WVPotions.WW_FEVER) != null)
+							p.removePotionEffect(WVPotions.WW_FEVER);
+					}
+					if (were.getWerewolfType() == WerewolfType.INFECTED) {
+						were.setWerewolfType(WerewolfType.FULL);
+					}
+				}
 			}
 		}
 	}
@@ -150,7 +155,7 @@ public class WerewolfEventhandler {
 		Entity entity = e.getEntity();
 		if (entity != null) {
 			AxisAlignedBB originalBB = entity.getEntityBoundingBox();
-			IWerewolf were = e.getEntity().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
+			IWerewolf were = entity.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
 
 			if (were != null && were.getIsTransformed()) {
 				AxisAlignedBB newBB = originalBB.setMaxY(entity.posY+2.4);
