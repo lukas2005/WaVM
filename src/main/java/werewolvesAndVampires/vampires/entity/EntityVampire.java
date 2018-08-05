@@ -105,7 +105,7 @@ public class EntityVampire extends EntityAgeable {
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        if (this.world.isDaytime() && !this.world.isRemote && this.shouldBurnInDay() && world.canSeeSky(this.getPosition())) {
+        if (this.world.isDaytime() && !this.world.isRemote && this.shouldBurnInDay() && !world.isRaining() && world.canSeeSky(this.getPosition())) {
             float f = this.world.getDifficultyForLocation(new BlockPos(this)).getAdditionalDifficulty();
             this.setFire(2 * (int) f);
         }

@@ -17,7 +17,7 @@ public class RenderEntityVampire extends RenderLiving<EntityVampire> {
     public static final Factory FACTORY = new Factory();
 
     public RenderEntityVampire(RenderManager rendermanagerIn) {
-        super(rendermanagerIn, new ModelVampire(), 0.5F);
+        super(rendermanagerIn, new ModelVamp(), 0.5F);
     }
 
     @Nullable
