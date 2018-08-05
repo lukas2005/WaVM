@@ -16,6 +16,8 @@ public abstract class EntityAIAvoid extends EntityAIBase {
     private Path path;
     private final PathNavigate navigation;
 
+    private int executionChance = 120;
+
     public EntityAIAvoid(EntityCreature entity,  double farSpeed) {
         this.entity = entity;
         this.speed = farSpeed;
@@ -25,6 +27,9 @@ public abstract class EntityAIAvoid extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
+        if (!shouldAvoidPosition(entity.world, entity.getPosition())) {
+            return false;
+        }
         Vec3d vec3d = findRandomTarget(this.entity, 16, 7, new Vec3d(this.entity.posX, this.entity.posY, this.entity.posZ));
         if (vec3d != null) {
             entity.world.setBlockToAir(new BlockPos((int) vec3d.x, (int) vec3d.y, (int) vec3d.z));

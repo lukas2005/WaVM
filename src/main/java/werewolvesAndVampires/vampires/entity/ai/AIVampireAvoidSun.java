@@ -13,6 +13,6 @@ public class AIVampireAvoidSun extends EntityAIAvoid {
 
     @Override
     protected boolean shouldAvoidPosition(World world, BlockPos pos) {
-        return world.canBlockSeeSky(pos) && world.isDaytime();
+        return world.canBlockSeeSky(pos) && world.isDaytime() && !world.isRaining();
     }
 }
