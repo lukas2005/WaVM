@@ -17,13 +17,13 @@ public class RenderEntityVampire extends RenderLiving<EntityVampire> {
     public static final Factory FACTORY = new Factory();
 
     public RenderEntityVampire(RenderManager rendermanagerIn) {
-        super(rendermanagerIn, new ModelVamp(), 0.5F);
+        super(rendermanagerIn, new ModelVampire(), 0.5F);
     }
 
     @Nullable
     @Override
     protected ResourceLocation getEntityTexture(EntityVampire entity) {
-        return new ResourceLocation(WVCore.MODID, "textures/entity/vamp.png");
+        return new ResourceLocation(WVCore.MODID, "textures/entity/vampire.png");
     }
 
     public static class Factory implements IRenderFactory<EntityVampire> {
