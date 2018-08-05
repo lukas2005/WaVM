@@ -1,9 +1,6 @@
 package werewolvesAndVampires.vampires.entity;
 
-import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.monster.EntityEvoker;
 import net.minecraft.entity.monster.EntityVex;
@@ -11,6 +8,7 @@ import net.minecraft.entity.monster.EntityVindicator;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.DamageSource;
@@ -20,11 +18,17 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.Village;
 import net.minecraft.village.VillageDoorInfo;
 import net.minecraft.world.World;
+import werewolvesAndVampires.utils.MathUtils;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 // At the moment we have the possibility of vampire babies. This may need removing in future, or we may want to make them more aggressive.
 public class EntityVampire extends EntityAgeable {
+
+    private static List<DamageSource> immunities = new ArrayList<>();
+    private static List<String> itemVulnerabilities = new ArrayList<>();
 
     public EntityVampire(World world) {
         super(world);
@@ -32,6 +36,15 @@ public class EntityVampire extends EntityAgeable {
         ((PathNavigateGround)this.getNavigator()).setBreakDoors(true);
         this.setCanPickUpLoot(false); // villagers usually can though.
 
+        immunities.add(DamageSource.FALL);
+        immunities.add(DamageSource.DROWN);
+
+        itemVulnerabilities.add(Items.WOODEN_SWORD.getUnlocalizedName());
+        itemVulnerabilities.add(Items.WOODEN_AXE.getUnlocalizedName());
+        itemVulnerabilities.add(Items.WOODEN_HOE.getUnlocalizedName());
+        itemVulnerabilities.add(Items.WOODEN_PICKAXE.getUnlocalizedName());
+        itemVulnerabilities.add(Items.WOODEN_SHOVEL.getUnlocalizedName());
+        itemVulnerabilities.add(Items.STICK.getUnlocalizedName());
     }
 
     @Override
@@ -46,7 +59,31 @@ public class EntityVampire extends EntityAgeable {
         this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
         this.tasks.addTask(6, new EntityVampire.AIVampireTarget(this, EntityPlayer.class));
         this.tasks.addTask(7, new EntityVampire.AIVampireTarget(this, EntityVillager.class));
-        this.tasks.addTask(8, new EntityAIWanderAvoidWater(this, 0.6D));
+        this.tasks.addTask(8, new EntityVampire.AIVampireWander(this, 0.6D));
+    }
+
+
+    @Override
+    protected void damageEntity(DamageSource damageSrc, float damageAmount) {
+        if (!immunities.contains(damageSrc)) {
+            super.damageEntity(damageSrc, damageAmount);
+
+        }
+    }
+
+    /**
+     *
+     * @param entityIn
+     * @return Should the attack go ahead?
+     */
+    @Override
+    public boolean hitByEntity(Entity entityIn) {
+        if (entityIn instanceof EntityPlayer) {
+            if (!itemVulnerabilities.contains(((EntityPlayer) entityIn).inventory.getCurrentItem().getUnlocalizedName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -66,7 +103,7 @@ public class EntityVampire extends EntityAgeable {
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        if (this.world.isDaytime() && !this.world.isRemote && this.shouldBurnInDay()) {
+        if (this.world.isDaytime() && !this.world.isRemote && this.shouldBurnInDay() && world.canSeeSky(this.getPosition())) {
             this.setFire(8);
         }
     }
@@ -295,5 +332,21 @@ public class EntityVampire extends EntityAgeable {
             this.frontDoor.incrementDoorOpeningRestrictionCounter();
         }
     }
+
+    static class AIVampireWander extends EntityAIWander {
+
+        public AIVampireWander(EntityCreature creatureIn, double speedIn)
+        {
+            super(creatureIn, speedIn, 120);
+        }
+
+        @Nullable
+        protected Vec3d getPosition()
+        {
+            return MathUtils.generateRandomPosForVamp(this.entity, 10, 7, null, true);
+        }
+
+    }
+
 
 }
