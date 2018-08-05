@@ -1,13 +1,15 @@
 package werewolvesAndVampires.werewolves;
 
+import java.util.List;
 import java.util.Random;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EntitySelectors;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -16,17 +18,13 @@ import werewolvesAndVampires.core.WVItems;
 import werewolvesAndVampires.core.WVPotions;
 import werewolvesAndVampires.packets.PacketRegister;
 import werewolvesAndVampires.packets.SyncWerewolfCap;
-import werewolvesAndVampires.packets.WerewolfCameraUpdate;
 import werewolvesAndVampires.werewolves.capability.IWerewolf;
-import werewolvesAndVampires.werewolves.entity.EntityAngryPlayer;
 
 public class WerewolfHelpers {
 	public static Random rand = new Random();
 
-
 	public static void transformEntity(EntityLivingBase p, IWerewolf were, boolean transform) {
 		were.setIsTransformed(transform);
-		PacketRegister.INSTANCE.sendToDimension(new SyncWerewolfCap(were, p), p.dimension);
 		if (p instanceof EntityPlayer) {
 			EntityPlayer pl = (EntityPlayer) p;
 			for (int i = 0; i < pl.inventory.mainInventory.size(); ++i) {
@@ -40,10 +38,16 @@ public class WerewolfHelpers {
 					pl.inventory.armorInventory.get(i).damageItem(Integer.MAX_VALUE, pl);
 				}
 			}
+			if (doesPlayerHaveTotem(pl)) {
+				were.setBloodLust(-1);
+			} else {
+				were.setBloodLust(0);
+			}
 		}
-		
+
+		// TODO Fix this
 		if (!transform && p instanceof EntityPlayer)
-			gainControl((EntityPlayer) p, were);
+			were.setBloodLust(0);
 
 		WorldServer ws = (WorldServer) p.world;
 		int i = 0;
@@ -59,23 +63,8 @@ public class WerewolfHelpers {
 		} else {
 			p.setEntityBoundingBox(p.getEntityBoundingBox().contract(0, 1, 0));
 		}
+		PacketRegister.INSTANCE.sendToDimension(new SyncWerewolfCap(were, p), p.dimension);
 	}
-
-	public static void loseControl(EntityPlayer p, IWerewolf were) {
-		EntityAngryPlayer ap = new EntityAngryPlayer(p.world, p);
-		p.world.spawnEntity(ap);
-		PacketRegister.INSTANCE.sendTo(new WerewolfCameraUpdate(ap.getEntityId()), (EntityPlayerMP) p);
-		were.setBloodLust(200);
-		were.setEntity(ap.getEntityId());
-	}
-
-	public static void gainControl(EntityPlayer p, IWerewolf were) {
-		if(p.world.getEntityByID(were.getEntity()) instanceof EntityAngryPlayer)
-		((EntityAngryPlayer)p.world.getEntityByID(were.getEntity())).setIdNull();
-		were.setEntity(0);
-		PacketRegister.INSTANCE.sendTo(new WerewolfCameraUpdate(p.getEntityId()), (EntityPlayerMP) p);
-	}
-	
 
 	public static long timeUntilFullMoon(World world) {
 		if (world != null) {
@@ -86,39 +75,36 @@ public class WerewolfHelpers {
 			long timeSinceBeginningOfDay = (long) (worldTime - Math.floor(worldTime / 24000) * 24000);
 			long timeUntilMoonRises = 12566 - timeSinceBeginningOfDay;
 
-			return moonPhase == MoonPhase.FULL ? (timeUntilMoonRises < 0 ? 0 : timeUntilMoonRises) : (moonPhase.getDaysToFullMoon() * 24000 + (24000 - 12566)) - timeSinceBeginningOfDay;
+			return moonPhase == MoonPhase.FULL ? (timeUntilMoonRises < 0 ? 0 : timeUntilMoonRises)
+					: (moonPhase.getDaysToFullMoon() * 24000 + (24000 - 12566)) - timeSinceBeginningOfDay;
 		}
-		return  1;
+		return 1;
+	}
+
+	public static void AttackNeaby(EntityPlayer p, IWerewolf were) {
+		List<Entity> list = p.world.getEntitiesInAABBexcluding(p, p.getEntityBoundingBox().grow(2.5),
+				EntitySelectors.CAN_AI_TARGET);
+		if (!list.isEmpty())
+			p.attackTargetEntityWithCurrentItem(list.get(0));
+		were.setBloodLust(20);
+		p.swingArm(EnumHand.MAIN_HAND);
 	}
 
 	public static void controlTick(TickEvent.PlayerTickEvent e, IWerewolf were) {
 		if (were.getBloodLust() == 0) {
-			switch (e.player.world.getDifficulty()) {
-			case EASY:
-				if (!e.player.world.getEntitiesInAABBexcluding(e.player, e.player.getEntityBoundingBox().grow(10),
-						EntitySelectors.CAN_AI_TARGET).isEmpty())
-					loseControl(e.player, were);
-				break;
-			case HARD:
-				if (!e.player.world.getEntitiesInAABBexcluding(e.player, e.player.getEntityBoundingBox().grow(20),
-						EntitySelectors.CAN_AI_TARGET).isEmpty())
-					loseControl(e.player, were);
-				break;
-			case NORMAL:
-				if (!e.player.world.getEntitiesInAABBexcluding(e.player, e.player.getEntityBoundingBox().grow(15),
-						EntitySelectors.CAN_AI_TARGET).isEmpty())
-					loseControl(e.player, were);
-				break;
-			case PEACEFUL:
-				break;
-			default:
-				break;
-			}
-		}else if(were.getBloodLust() > 1) {
+			AttackNeaby(e.player, were);
+		} else if (were.getBloodLust() > 0) {
 			were.setBloodLust(were.getBloodLust() - 1);
-		}else if(were.getBloodLust() == 1) {
-			gainControl(e.player, were);
-			were.setBloodLust(0);
 		}
+	}
+
+	public static boolean doesPlayerHaveTotem(EntityPlayer player) {
+		for (ItemStack i : player.inventory.mainInventory) {
+			if (i.getItem() == WVItems.werewolf_totem)
+				return true;
+		}
+		if (player.inventory.offHandInventory.get(0).getItem() == WVItems.werewolf_totem)
+			return true;
+		return false;
 	}
 }

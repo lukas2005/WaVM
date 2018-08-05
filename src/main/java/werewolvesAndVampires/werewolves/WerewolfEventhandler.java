@@ -16,8 +16,7 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.ServerChatEvent;
@@ -42,7 +41,6 @@ import werewolvesAndVampires.packets.SyncWerewolfCap;
 import werewolvesAndVampires.werewolves.capability.IWerewolf;
 import werewolvesAndVampires.werewolves.capability.WerewolfProvider;
 import werewolvesAndVampires.werewolves.capability.WerewolfType;
-import werewolvesAndVampires.werewolves.entity.EntityAngryPlayer;
 import werewolvesAndVampires.werewolves.entity.WerewolfEntity;
 import werewolvesAndVampires.werewolves.rendering.WerewolfRenderPlayer;
 
@@ -56,8 +54,7 @@ public class WerewolfEventhandler {
 
 	@SubscribeEvent
 	public static void attachCapabilitys(AttachCapabilitiesEvent<Entity> e) {
-		if (e.getObject() instanceof EntityPlayer || e.getObject() instanceof EntityVillager
-				|| e.getObject() instanceof EntityAngryPlayer) {
+		if (e.getObject() instanceof EntityPlayer || e.getObject() instanceof EntityVillager) {
 			e.addCapability(werewolfCapLoc, new WerewolfProvider());
 		}
 	}
@@ -75,17 +72,6 @@ public class WerewolfEventhandler {
 					e.getEntityPlayer().rotationYaw, e.getPartialRenderTick());
 		}else if(were.getIsTransformed()) {
 			e.setCanceled(true);
-		}
-	}
-
-	public static Entity cam = null;
-
-	@SubscribeEvent
-	public static void onPreRender(RenderGameOverlayEvent.Pre e) {
-		if (cam != null) {
-			Minecraft.getMinecraft().setRenderViewEntity(cam); 
-		} else {
-			Minecraft.getMinecraft().setRenderViewEntity(Minecraft.getMinecraft().player);
 		}
 	}
 
@@ -119,12 +105,10 @@ public class WerewolfEventhandler {
 	public static void playerTick(TickEvent.PlayerTickEvent e) {
 		//System.out.println(WerewolfHelpers.timeUntilFullMoon(e.player.world));
 		EntityPlayer p = e.player;
-		World world = p.world;
-		BlockPos pos = p.getPosition();
 
 		IWerewolf were = p.getCapability(WerewolfProvider.WEREWOLF_CAP, null);
 		if (e.side.isServer() && e.player.world.getCurrentMoonPhaseFactor() == 1F && !e.player.world.isDaytime()
-				&& !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))
+				&& !WerewolfHelpers.doesPlayerHaveTotem(e.player)
 				&& were.getWerewolfType() == WerewolfType.FULL) {
 
 			if (!were.getIsTransformed()
@@ -133,7 +117,7 @@ public class WerewolfEventhandler {
 			} else {
 				WerewolfHelpers.controlTick(e, were);
 			}
-		} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
+		} else if (e.side.isServer() && !WerewolfHelpers.doesPlayerHaveTotem(e.player)) {
 			if (were.getIsTransformed()) {
 				p.stepHeight = 1.25F;
 				p.eyeHeight  = 1.97F;
@@ -174,7 +158,7 @@ public class WerewolfEventhandler {
 			}
 		}
 	}
-
+	
 	@SubscribeEvent
 	public static void onFall(LivingFallEvent e) {
 		if (e.getEntityLiving().hasCapability(WerewolfProvider.WEREWOLF_CAP, null) && !e.getEntity().world.isRemote) {
