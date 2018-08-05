@@ -59,9 +59,8 @@ public class EntityVampire extends EntityAgeable {
         this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
         this.tasks.addTask(6, new EntityVampire.AIVampireTarget(this, EntityPlayer.class));
         this.tasks.addTask(7, new EntityVampire.AIVampireTarget(this, EntityVillager.class));
-        this.tasks.addTask(8, new EntityVampire.AIVampireWander(this, 0.6D));
+        this.tasks.addTask(8, new EntityVampire.AIVampireWander(this, 0.6D)); // TODO: This still needs more development
     }
-
 
     @Override
     protected void damageEntity(DamageSource damageSrc, float damageAmount) {
@@ -143,7 +142,7 @@ public class EntityVampire extends EntityAgeable {
         @Override
         public boolean shouldExecute() {
             float f = this.taskOwner.getBrightness();
-            return f < 0.5F && super.shouldExecute();
+            return true;//f < 0.5F && super.shouldExecute();
         }
     }
 

@@ -14,12 +14,12 @@ import java.util.Random;
 public class MathUtils {
 
     @Nullable
-    public static Vec3d generateRandomPosForVamp(EntityCreature creature, int xz, int p_191379_2_, @Nullable Vec3d p_191379_3_, boolean p_191379_4_)
+    public static Vec3d generateRandomPosForVamp(EntityCreature creature, int xz, int p_191379_2_, @Nullable Vec3d vec3d, boolean p_191379_4_)
     {
         PathNavigate pathnavigate = creature.getNavigator();
         Random random = creature.getRNG();
         boolean flag;
-        
+
         if (creature.hasHome())
         {
             double d0 = creature.getHomePosition().distanceSq((double) MathHelper.floor(creature.posX), (double)MathHelper.floor(creature.posY), (double)MathHelper.floor(creature.posZ)) + 4.0D;
@@ -43,7 +43,7 @@ public class MathUtils {
             int i1 = random.nextInt(2 * p_191379_2_ + 1) - p_191379_2_;
             int j1 = random.nextInt(2 * xz + 1) - xz;
 
-            if (p_191379_3_ == null || (double)l * p_191379_3_.x + (double)j1 * p_191379_3_.z >= 0.0D)
+            if (vec3d == null || (double)l * vec3d.x + (double)j1 * vec3d.z >= 0.0D)
             {
                 if (creature.hasHome() && xz > 1)
                 {
@@ -70,6 +70,10 @@ public class MathUtils {
 
                 BlockPos blockpos1 = new BlockPos((double)l + creature.posX, (double)i1 + creature.posY, (double)j1 + creature.posZ);
 
+                if (isDangerousDestination(blockpos1, creature)) {
+                    continue;
+                }
+
                 if ((!flag || creature.isWithinHomeDistanceFromPosition(blockpos1)) && pathnavigate.canEntityStandOnPos(blockpos1))
                 {
                     if (!p_191379_4_)
@@ -78,10 +82,6 @@ public class MathUtils {
 
                         if (isWaterDestination(blockpos1, creature))
                         {
-                            continue;
-                        }
-
-                        if (isDangerousDestination(blockpos1, creature)) {
                             continue;
                         }
 
@@ -136,6 +136,8 @@ public class MathUtils {
     }
 
     private static boolean isDangerousDestination(BlockPos pos, EntityCreature creature) {
+        if (!creature.world.canSeeSky(creature.getPosition()) && creature.world.canSeeSky(pos))
+            return true;
         return creature.world.isDaytime() && creature.world.canSeeSky(pos) && creature.world.getLight(pos) > creature.world.getLight(creature.getPosition());
     }
 
