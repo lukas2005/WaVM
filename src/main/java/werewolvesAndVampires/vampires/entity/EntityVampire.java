@@ -10,6 +10,10 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
@@ -28,8 +32,12 @@ import java.util.List;
 // At the moment we have the possibility of vampire babies. This may need removing in future, or we may want to make them more aggressive.
 public class EntityVampire extends EntityAgeable {
 
+    private static final DataParameter<Integer> VARIANT = EntityDataManager.<Integer>createKey(EntityVampire.class, DataSerializers.VARINT);
+
     private static List<DamageSource> immunities = new ArrayList<>();
     private static List<String> itemVulnerabilities = new ArrayList<>();
+
+
 
     public EntityVampire(World world) {
         super(world);
@@ -46,6 +54,30 @@ public class EntityVampire extends EntityAgeable {
         itemVulnerabilities.add(Items.WOODEN_PICKAXE.getUnlocalizedName());
         itemVulnerabilities.add(Items.WOODEN_SHOVEL.getUnlocalizedName());
         itemVulnerabilities.add(Items.STICK.getUnlocalizedName());
+    }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        this.dataManager.register(VARIANT, Integer.valueOf(getRNG().nextInt(4)));
+
+    }
+
+    public int getVariant()
+    {
+        return Math.max(this.dataManager.get(VARIANT).intValue(), 0);
+    }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("variant", getVariant());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.dataManager.set(VARIANT, compound.getInteger("variant"));
     }
 
     @Override

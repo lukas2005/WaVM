@@ -23,7 +23,26 @@ public class RenderEntityVampire extends RenderLiving<EntityVampire> {
     @Nullable
     @Override
     protected ResourceLocation getEntityTexture(EntityVampire entity) {
-        return new ResourceLocation(WVCore.MODID, "textures/entity/vampire.png");
+        String variantRes = "vampire";
+        switch (entity.getVariant()) {
+            case 0:
+                variantRes = "vampire_master";
+                break;
+            case 1:
+                variantRes = "vampire_black";
+                break;
+            case 2:
+                variantRes = "vampire_white";
+                break;
+            case 3:
+                variantRes = "vampire_red";
+                break;
+            case 4:
+            default:
+                variantRes = "vampire";
+                break;
+        }
+        return new ResourceLocation(WVCore.MODID, "textures/entity/" + variantRes + ".png");
     }
 
     public static class Factory implements IRenderFactory<EntityVampire> {
