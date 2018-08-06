@@ -1,9 +1,9 @@
 package com.aguila.wavm.blocks;
 
-import com.aguila.wavm.events.WorldTimeQueue;
 import com.aguila.wavm.capability.werewolf.IWerewolf;
 import com.aguila.wavm.capability.werewolf.WerewolfProvider;
 import com.aguila.wavm.capability.werewolf.WerewolfType;
+import com.aguila.wavm.events.WorldTimeQueue;
 import com.aguila.wavm.init.WVItems;
 import com.aguila.wavm.utils.WerewolfHelpers;
 import net.minecraft.block.Block;

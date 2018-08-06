@@ -1,9 +1,9 @@
 package com.aguila.wavm.tileentity.tesr;
 
-import com.aguila.wavm.init.WVCore;
-import com.aguila.wavm.utils.WVMath;
+import com.aguila.wavm.core.WVCore;
 import com.aguila.wavm.model.ModelCoffin;
 import com.aguila.wavm.tileentity.TileEntityCoffin;
+import com.aguila.wavm.utils.WVMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.ResourceLocation;

@@ -1,8 +1,8 @@
 package com.aguila.wavm.render.entity;
 
+import com.aguila.wavm.entity.EntityVampire;
 import com.aguila.wavm.init.WVCore;
 import com.aguila.wavm.model.ModelVamp;
-import com.aguila.wavm.entity.EntityVampire;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;

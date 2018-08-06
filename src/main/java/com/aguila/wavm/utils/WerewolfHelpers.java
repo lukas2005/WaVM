@@ -1,13 +1,10 @@
 package com.aguila.wavm.utils;
 
-import java.util.List;
-import java.util.Random;
-
+import com.aguila.wavm.capability.werewolf.IWerewolf;
 import com.aguila.wavm.init.WVItems;
 import com.aguila.wavm.init.WVPotions;
 import com.aguila.wavm.packets.PacketRegister;
 import com.aguila.wavm.packets.SyncWerewolfCap;
-import com.aguila.wavm.capability.werewolf.IWerewolf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,6 +16,9 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import java.util.List;
+import java.util.Random;
 
 public class WerewolfHelpers {
 	public static Random rand = new Random();
@@ -81,7 +81,7 @@ public class WerewolfHelpers {
 		return 1;
 	}
 
-	public static void AttackNeaby(EntityPlayer p, IWerewolf were) {
+	public static void attackNearby(EntityPlayer p, IWerewolf were) {
 		List<Entity> list = p.world.getEntitiesInAABBexcluding(p, p.getEntityBoundingBox().grow(2.5),
 				EntitySelectors.CAN_AI_TARGET);
 		if (!list.isEmpty())
@@ -92,7 +92,7 @@ public class WerewolfHelpers {
 
 	public static void controlTick(TickEvent.PlayerTickEvent e, IWerewolf were) {
 		if (were.getBloodLust() == 0) {
-			AttackNeaby(e.player, were);
+			attackNearby(e.player, were);
 		} else if (were.getBloodLust() > 0) {
 			were.setBloodLust(were.getBloodLust() - 1);
 		}

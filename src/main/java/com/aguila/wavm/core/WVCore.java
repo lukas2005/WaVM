@@ -1,6 +1,5 @@
 package com.aguila.wavm.core;
 
-import com.aguila.wavm.core.CommonProxy;
 import com.aguila.wavm.packets.PacketRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;

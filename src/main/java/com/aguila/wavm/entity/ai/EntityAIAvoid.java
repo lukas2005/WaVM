@@ -7,6 +7,7 @@ import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+
 import java.util.Random;
 
 public abstract class EntityAIAvoid extends EntityAIBase {
