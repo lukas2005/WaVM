@@ -17,8 +17,6 @@ public abstract class EntityAIAvoid extends EntityAIBase {
     private Path path;
     private final PathNavigate navigation;
 
-    private int executionChance = 120;
-
     public EntityAIAvoid(EntityCreature entity,  double farSpeed) {
         this.entity = entity;
         this.speed = farSpeed;

@@ -2,7 +2,7 @@ package com.aguila.wavm.render.entity;
 
 import com.aguila.wavm.capability.werewolf.IWerewolf;
 import com.aguila.wavm.capability.werewolf.WerewolfProvider;
-import com.aguila.wavm.init.WVCore;
+import com.aguila.wavm.core.WVCore;
 import com.aguila.wavm.model.WerewolfModel;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.entity.RenderLivingBase;

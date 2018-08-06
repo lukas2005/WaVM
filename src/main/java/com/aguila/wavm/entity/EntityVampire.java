@@ -1,5 +1,6 @@
 package com.aguila.wavm.entity;
 
+import com.aguila.wavm.entity.ai.AIVampireAvoidRunningWater;
 import com.aguila.wavm.entity.ai.AIVampireAvoidSun;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
@@ -86,6 +87,7 @@ public class EntityVampire extends EntityAgeable {
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityVindicator.class, 8.0F, 0.8D, 0.8D));
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityVex.class, 8.0F, 0.6D, 0.6D));
         this.tasks.addTask(2, new AIVampireAvoidSun(this, 0.6D));
+//        this.tasks.addTask(2, new AIVampireAvoidRunningWater(this, 0.6D));
         this.tasks.addTask(3, new EntityAIWander(this, 0.6D));
 //        this.tasks.addTask(3, new EntityVampire.AIVampireMoveIndoors(this));
 //        this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));

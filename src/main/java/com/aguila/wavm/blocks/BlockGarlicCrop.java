@@ -23,7 +23,6 @@ public class BlockGarlicCrop extends BlockCrops {
 			new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.5625D, 1.0D)
 	};
 
-
 	public BlockGarlicCrop() {
 		setRegistryName(new ResourceLocation(WVCore.MODID, "garlic_crop"));
 		setUnlocalizedName(WVCore.MODID + ".garlic_crop");
