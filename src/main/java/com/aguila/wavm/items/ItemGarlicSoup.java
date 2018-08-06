@@ -1,6 +1,6 @@
 package com.aguila.wavm.items;
 
-import com.aguila.wavm.init.WVCore;
+import com.aguila.wavm.core.WVCore;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemSoup;

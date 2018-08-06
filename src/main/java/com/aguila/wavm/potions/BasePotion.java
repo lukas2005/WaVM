@@ -1,6 +1,6 @@
 package com.aguila.wavm.potions;
 
-import com.aguila.wavm.init.WVCore;
+import com.aguila.wavm.core.WVCore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.entity.EntityLivingBase;
