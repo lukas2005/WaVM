@@ -57,7 +57,6 @@ public abstract class EntityAIAvoid extends EntityAIBase {
         for (int k = 0; k < 10; ++k) {
             BlockPos newPos = currLoc.add(random.nextInt(xz) - (xz / 2), random.nextInt(xz), random.nextInt(xz) - (xz / 2));
             if (!shouldAvoidPosition(entity.world, newPos)) {
-                System.out.println(currLoc + ": " + newPos + ": " + entity.world.canSeeSky(newPos));
                 return new Vec3d(newPos.getX(), newPos.getY(), newPos.getZ());
             }
         }

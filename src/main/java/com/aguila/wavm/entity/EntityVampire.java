@@ -100,24 +100,16 @@ public class EntityVampire extends EntityAgeable {
     @Override
     protected void damageEntity(DamageSource damageSrc, float damageAmount) {
         if (!immunities.contains(damageSrc)) {
-            super.damageEntity(damageSrc, damageAmount);
-
-        }
-    }
-
-    /**
-     *
-     * @param entityIn
-     * @return Should the attack go ahead?
-     */
-    @Override
-    public boolean hitByEntity(Entity entityIn) {
-        if (entityIn instanceof EntityPlayer) {
-            if (!itemVulnerabilities.contains(((EntityPlayer) entityIn).inventory.getCurrentItem().getUnlocalizedName())) {
-                return true;
+            if (damageSrc.getTrueSource() instanceof EntityPlayer && itemVulnerabilities.contains(((EntityPlayer) damageSrc.getTrueSource()).inventory.getCurrentItem().getUnlocalizedName())) {
+                System.out.println(damageAmount);
+                System.out.println(damageSrc.getTrueSource());
+                super.damageEntity(damageSrc, damageAmount);
+            } else if (!(damageSrc.getTrueSource() instanceof EntityPlayer)) {
+                super.damageEntity(damageSrc, damageAmount);
             }
         }
-        return false;
+        System.out.println(this.getHealth());
+
     }
 
     @Override
@@ -140,6 +132,16 @@ public class EntityVampire extends EntityAgeable {
         if (this.world.isDaytime() && !this.world.isRemote && this.shouldBurnInDay() && !world.isRaining() && world.canSeeSky(this.getPosition())) {
             this.setFire(4);
         }
+    }
+
+    @Override
+    public boolean attackEntityAsMob(Entity entityIn) {
+        if (entityIn instanceof EntityPlayer) {
+            if (!itemVulnerabilities.contains(((EntityPlayer) entityIn).inventory.getCurrentItem().getUnlocalizedName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected boolean shouldBurnInDay() {
