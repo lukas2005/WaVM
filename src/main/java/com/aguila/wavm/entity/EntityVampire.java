@@ -36,8 +36,6 @@ public class EntityVampire extends EntityAgeable {
     private static List<DamageSource> immunities = new ArrayList<>();
     private static List<String> itemVulnerabilities = new ArrayList<>();
 
-
-
     public EntityVampire(World world) {
         super(world);
         this.setSize(0.6F, 1.95F);
@@ -87,10 +85,8 @@ public class EntityVampire extends EntityAgeable {
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityVindicator.class, 8.0F, 0.8D, 0.8D));
         this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityVex.class, 8.0F, 0.6D, 0.6D));
         this.tasks.addTask(2, new AIVampireAvoidSun(this, 0.6D));
-//        this.tasks.addTask(2, new AIVampireAvoidRunningWater(this, 0.6D));
+        this.tasks.addTask(2, new AIVampireAvoidRunningWater(this, 0.6D));
         this.tasks.addTask(3, new EntityAIWander(this, 0.6D));
-//        this.tasks.addTask(3, new EntityVampire.AIVampireMoveIndoors(this));
-//        this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 0.6D));
         this.tasks.addTask(4, new EntityVampire.AIVampireTarget(this, EntityPlayer.class));
         this.tasks.addTask(5, new EntityVampire.AIVampireTarget(this, EntityVillager.class));
         this.tasks.addTask(6, new EntityAIOpenDoor(this, true));
@@ -108,7 +104,6 @@ public class EntityVampire extends EntityAgeable {
                 super.damageEntity(damageSrc, damageAmount);
             }
         }
-        System.out.println(this.getHealth());
 
     }
 

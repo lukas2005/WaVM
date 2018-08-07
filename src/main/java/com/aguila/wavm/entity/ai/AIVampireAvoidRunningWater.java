@@ -1,8 +1,10 @@
 package com.aguila.wavm.entity.ai;
 
 import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -15,10 +17,13 @@ public class AIVampireAvoidRunningWater extends EntityAIAvoid {
     @Override
     protected boolean shouldAvoidPosition(World world, BlockPos pos) {
         IBlockState blockState = world.getBlockState(pos);
-        int height = blockState.getValue(BlockLiquid.LEVEL);
-        if (height < 15) {
-            System.out.println(pos);
-            return true;
+        if (blockState.getMaterial() == Material.WATER) {
+            int height = blockState.getValue(BlockLiquid.LEVEL);
+            if (height < 15) {
+                System.out.println(pos);
+                world.setBlockState(pos, Blocks.REDSTONE_BLOCK.getDefaultState());
+                return true;
+            }
         }
         return false;
     }
