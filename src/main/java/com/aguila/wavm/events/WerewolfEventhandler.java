@@ -236,7 +236,7 @@ public class WerewolfEventhandler {
 		if (e.getEntity() instanceof EntityVillager && !e.getWorld().isRemote) {
 			PacketRegister.INSTANCE.sendToDimension(
 					new SyncWerewolfCap(e.getEntity().getCapability(WerewolfProvider.WEREWOLF_CAP, null),
-							e.getEntity()),
+					e.getEntity()),
 					e.getEntity().dimension);
 		}
 	}

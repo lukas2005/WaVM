@@ -21,15 +21,15 @@ public class WVItems {
 
 	//Item References go here
 	public static final BaseItem WEREWOLF_TOTEM = (BaseItem) addItem(new ItemWerewolfTotem());
-	public static BaseItem WOLFSBANE_DUST = (BaseItem) addItem(new ItemWolfsbaneDust());
+	public static final BaseItem WOLFSBANE_DUST = (BaseItem) addItem(new ItemWolfsbaneDust());
 
 	// Food
-	public static BaseItemFood NETHER_APPLE = (BaseItemFood) addItem(new ItemNetherApple());
-	public static ItemGarlic GARLIC = (ItemGarlic) addItem(new ItemGarlic());
-	public static ItemGarlicSoup GARLIC_SOUP = (ItemGarlicSoup) addItem(new ItemGarlicSoup());
+	public static final BaseItemFood NETHER_APPLE = (BaseItemFood) addItem(new ItemNetherApple());
+	public static final ItemGarlic GARLIC = (ItemGarlic) addItem(new ItemGarlic());
+	public static final ItemGarlicSoup GARLIC_SOUP = (ItemGarlicSoup) addItem(new ItemGarlicSoup());
 
 	// Test items
-	public static BaseItem WW_TEST_ITEM = (BaseItem) addItem(new WWTestItem());
+	public static final BaseItem WW_TEST_ITEM = (BaseItem) addItem(new WWTestItem());
 
 	private static Item addItem(Item item) {
 		items.add(item);
