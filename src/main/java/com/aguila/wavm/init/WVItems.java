@@ -2,50 +2,54 @@ package com.aguila.wavm.init;
 
 import com.aguila.wavm.core.WVCore;
 import com.aguila.wavm.items.*;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ObjectHolder(WVCore.MODID)
 public class WVItems {
-	
+
+	private static List<Item> items = new ArrayList<>();
+
 	//Item References go here
-	public static BaseItem werewolf_totem = new ItemWerewolfTotem();
-	public static BaseItem wolfsbane_dust = new ItemWolfsbaneDust();
+	public static final BaseItem WEREWOLF_TOTEM = (BaseItem) addItem(new ItemWerewolfTotem());
+	public static BaseItem WOLFSBANE_DUST = (BaseItem) addItem(new ItemWolfsbaneDust());
 
 	// Food
-	public static BaseItemFood nether_apple = new ItemNetherApple();
-	public static ItemGarlic garlic = new ItemGarlic();
-	public static ItemGarlicSoup garlic_soup = new ItemGarlicSoup();
+	public static BaseItemFood NETHER_APPLE = (BaseItemFood) addItem(new ItemNetherApple());
+	public static ItemGarlic GARLIC = (ItemGarlic) addItem(new ItemGarlic());
+	public static ItemGarlicSoup GARLIC_SOUP = (ItemGarlicSoup) addItem(new ItemGarlicSoup());
 
 	// Test items
-	public static BaseItem ww_test_item = new WWTestItem();
-	
+	public static BaseItem WW_TEST_ITEM = (BaseItem) addItem(new WWTestItem());
+
+	private static Item addItem(Item item) {
+		items.add(item);
+		return item;
+	}
+
 
 	public static void regItems(RegistryEvent.Register<Item> event) {
 		IForgeRegistry<Item> reg = event.getRegistry();
 		reg.registerAll(
-				werewolf_totem,
-				wolfsbane_dust,
-				nether_apple,
-				garlic,
-				garlic_soup
+				items.toArray(new Item[items.size()])
 		);
 
-		// Test items
-		reg.registerAll(
-				ww_test_item
-		);
 	}
-	
-	public static void regModels() {
-		werewolf_totem.regModel();
-		wolfsbane_dust.regModel();
 
-		nether_apple.regModel();
-		garlic.regModel();
-		garlic_soup.regModel();
+	@SideOnly(Side.CLIENT)
+	public static void regModels() {
+		for (Item item : items) {
+			ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
+		}
 	}
 	
 }

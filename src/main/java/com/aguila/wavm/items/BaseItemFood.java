@@ -20,9 +20,4 @@ public class BaseItemFood extends ItemFood {
 		this(amount, 0.6F, isWolfFood, name);
 	}
 
-	@SideOnly(Side.CLIENT)
-	public void regModel() {
-		ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-	}
-
 }

@@ -33,11 +33,11 @@ public class BlockGarlicCrop extends BlockCrops {
 	}
 
 	protected Item getSeed() {
-		return WVItems.garlic;
+		return WVItems.GARLIC;
 	}
 
 	protected Item getCrop() {
-		return WVItems.garlic;
+		return WVItems.GARLIC;
 	}
 
 }

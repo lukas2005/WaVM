@@ -290,12 +290,12 @@ public class BlockWolfsbaneDust extends BaseBlock {
 	 */
 	@Override
 	public Item getItemDropped(IBlockState state, Random rand, int fortune) {
-		return WVItems.wolfsbane_dust;
+		return WVItems.WOLFSBANE_DUST;
 	}
 
 	@Override
 	public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
-		return new ItemStack(WVItems.wolfsbane_dust);
+		return new ItemStack(WVItems.WOLFSBANE_DUST);
 	}
 
 	@SideOnly(Side.CLIENT)

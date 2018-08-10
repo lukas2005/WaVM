@@ -26,9 +26,4 @@ public class ItemGarlic extends ItemSeedFood {
 
 	}
 
-	@SideOnly(Side.CLIENT)
-	public void regModel() {
-		ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-	}
-
 }

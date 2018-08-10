@@ -113,7 +113,7 @@ public class WerewolfEventhandler {
 				if (were.getWerewolfType() == WerewolfType.FULL &&
 						world.getCurrentMoonPhaseFactor() == 1F &&
 						WerewolfHelpers.timeUntilFullMoon(world) == 0 &&
-						!p.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
+						!p.inventory.hasItemStack(new ItemStack(WVItems.WEREWOLF_TOTEM))) {
 
 					if (!were.getIsTransformed()
 							&& e.player.world.canBlockSeeSky(new BlockPos(e.player.posX, e.player.posY + 1, e.player.posZ))) {
@@ -121,7 +121,7 @@ public class WerewolfEventhandler {
 					} else {
 						WerewolfHelpers.controlTick(e, were);
 					}
-				} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.werewolf_totem))) {
+				} else if (e.side.isServer() && !e.player.inventory.hasItemStack(new ItemStack(WVItems.WEREWOLF_TOTEM))) {
 					if (were.getIsTransformed()) {
 						p.stepHeight = 1.25F;
 						p.eyeHeight = 1.97F;
@@ -262,7 +262,7 @@ public class WerewolfEventhandler {
 	@SubscribeEvent
 	public static void pickupEvent(EntityItemPickupEvent e) {
 		IWerewolf were = e.getEntityPlayer().getCapability(WerewolfProvider.WEREWOLF_CAP, null);
-		if (were.getIsTransformed() && e.getItem().getItem().getItem() != WVItems.werewolf_totem
+		if (were.getIsTransformed() && e.getItem().getItem().getItem() != WVItems.WEREWOLF_TOTEM
 				&& were.getWerewolfType() == WerewolfType.FULL) {
 			e.setCanceled(true);
 		}

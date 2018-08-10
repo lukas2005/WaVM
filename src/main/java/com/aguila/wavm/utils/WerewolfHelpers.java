@@ -28,13 +28,13 @@ public class WerewolfHelpers {
 		if (p instanceof EntityPlayer) {
 			EntityPlayer pl = (EntityPlayer) p;
 			for (int i = 0; i < pl.inventory.mainInventory.size(); ++i) {
-				if (pl.inventory.mainInventory.get(i).getItem() == WVItems.werewolf_totem) {
+				if (pl.inventory.mainInventory.get(i).getItem() == WVItems.WEREWOLF_TOTEM) {
 					pl.dropItem(pl.inventory.mainInventory.get(i), true, false);
 					pl.inventory.mainInventory.set(i, ItemStack.EMPTY);
 				}
 			}
 			for (int i = 0; i < pl.inventory.armorInventory.size(); ++i) {
-				if (pl.inventory.armorInventory.get(i).getItem() == WVItems.werewolf_totem) {
+				if (pl.inventory.armorInventory.get(i).getItem() == WVItems.WEREWOLF_TOTEM) {
 					pl.inventory.armorInventory.get(i).damageItem(Integer.MAX_VALUE, pl);
 				}
 			}
@@ -100,10 +100,10 @@ public class WerewolfHelpers {
 
 	public static boolean doesPlayerHaveTotem(EntityPlayer player) {
 		for (ItemStack i : player.inventory.mainInventory) {
-			if (i.getItem() == WVItems.werewolf_totem)
+			if (i.getItem() == WVItems.WEREWOLF_TOTEM)
 				return true;
 		}
-		if (player.inventory.offHandInventory.get(0).getItem() == WVItems.werewolf_totem)
+		if (player.inventory.offHandInventory.get(0).getItem() == WVItems.WEREWOLF_TOTEM)
 			return true;
 		return false;
 	}

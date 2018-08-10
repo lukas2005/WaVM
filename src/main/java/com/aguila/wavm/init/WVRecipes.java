@@ -10,18 +10,18 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class WVRecipes {
 	
 	public static void init() {
-		GameRegistry.addSmelting(WVBlocks.wolfsbane, new ItemStack(WVItems.wolfsbane_dust), 1.0f);
+		GameRegistry.addSmelting(WVBlocks.wolfsbane, new ItemStack(WVItems.WOLFSBANE_DUST), 1.0f);
 		GameRegistry.addShapedRecipe(new ResourceLocation(WVCore.MODID, "wolfsbane_cake"), null, new ItemStack(WVBlocks.wolfsbane_cake),
 				"MMM",
 						 "DED",
 						 "WWW",
 				'M', Items.MILK_BUCKET,
-				'D', WVItems.wolfsbane_dust,
+				'D', WVItems.WOLFSBANE_DUST,
 				'E', Items.EGG,
 				'W', Items.WHEAT
 		);
 
-		GameRegistry.addShapedRecipe(new ResourceLocation(WVCore.MODID, "nether_apple"), null, new ItemStack(WVItems.nether_apple),
+		GameRegistry.addShapedRecipe(new ResourceLocation(WVCore.MODID, "nether_apple"), null, new ItemStack(WVItems.NETHER_APPLE),
 				"WSW",
 					     "SAS",
 					     "WSW",
@@ -30,10 +30,10 @@ public class WVRecipes {
 				'A', Items.APPLE
 		);
 
-		GameRegistry.addShapelessRecipe(new ResourceLocation(WVCore.MODID, "garlic_soup"), null, new ItemStack(WVItems.garlic_soup),
-				Ingredient.fromItem(WVItems.garlic),
-				Ingredient.fromItem(WVItems.garlic),
-				Ingredient.fromItem(WVItems.garlic),
+		GameRegistry.addShapelessRecipe(new ResourceLocation(WVCore.MODID, "garlic_soup"), null, new ItemStack(WVItems.GARLIC_SOUP),
+				Ingredient.fromItem(WVItems.GARLIC),
+				Ingredient.fromItem(WVItems.GARLIC),
+				Ingredient.fromItem(WVItems.GARLIC),
 				Ingredient.fromItem(Items.BOWL)
 		);
 	}
