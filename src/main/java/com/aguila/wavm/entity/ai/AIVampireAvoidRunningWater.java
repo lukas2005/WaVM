@@ -19,9 +19,7 @@ public class AIVampireAvoidRunningWater extends EntityAIAvoid {
         IBlockState blockState = world.getBlockState(pos);
         if (blockState.getMaterial() == Material.WATER) {
             int height = blockState.getValue(BlockLiquid.LEVEL);
-            if (height < 15) {
-                System.out.println(pos);
-                world.setBlockState(pos, Blocks.REDSTONE_BLOCK.getDefaultState());
+            if (height > 0) {
                 return true;
             }
         }

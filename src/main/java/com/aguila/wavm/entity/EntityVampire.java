@@ -2,6 +2,10 @@ package com.aguila.wavm.entity;
 
 import com.aguila.wavm.entity.ai.AIVampireAvoidRunningWater;
 import com.aguila.wavm.entity.ai.AIVampireAvoidSun;
+import com.aguila.wavm.init.WVDamageSources;
+import net.minecraft.block.BlockDynamicLiquid;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.monster.EntityEvoker;
@@ -10,6 +14,7 @@ import net.minecraft.entity.monster.EntityVindicator;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
@@ -80,15 +85,15 @@ public class EntityVampire extends EntityAgeable {
     @Override
     protected void initEntityAI() {
         this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityZombie.class, 8.0F, 0.6D, 0.6D));
-        this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityEvoker.class, 12.0F, 0.8D, 0.8D));
-        this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityVindicator.class, 8.0F, 0.8D, 0.8D));
-        this.tasks.addTask(1, new EntityAIAvoidEntity(this, EntityVex.class, 8.0F, 0.6D, 0.6D));
+        this.tasks.addTask(1, new EntityAIAvoidEntity<>(this, EntityZombie.class, 8.0F, 0.6D, 0.6D));
+        this.tasks.addTask(1, new EntityAIAvoidEntity<>(this, EntityEvoker.class, 12.0F, 0.8D, 0.8D));
+        this.tasks.addTask(1, new EntityAIAvoidEntity<>(this, EntityVindicator.class, 8.0F, 0.8D, 0.8D));
+        this.tasks.addTask(1, new EntityAIAvoidEntity<>(this, EntityVex.class, 8.0F, 0.6D, 0.6D));
         this.tasks.addTask(2, new AIVampireAvoidSun(this, 0.6D));
         this.tasks.addTask(2, new AIVampireAvoidRunningWater(this, 0.6D));
         this.tasks.addTask(3, new EntityAIWander(this, 0.6D));
-        this.tasks.addTask(4, new EntityVampire.AIVampireTarget(this, EntityPlayer.class));
-        this.tasks.addTask(5, new EntityVampire.AIVampireTarget(this, EntityVillager.class));
+        this.tasks.addTask(4, new EntityVampire.AIVampireTarget<>(this, EntityPlayer.class));
+        this.tasks.addTask(5, new EntityVampire.AIVampireTarget<>(this, EntityVillager.class));
         this.tasks.addTask(6, new EntityAIOpenDoor(this, true));
 
     }
@@ -126,6 +131,11 @@ public class EntityVampire extends EntityAgeable {
         super.onLivingUpdate();
         if (this.world.isDaytime() && !this.world.isRemote && this.shouldBurnInDay() && !world.isRaining() && world.canSeeSky(this.getPosition())) {
             this.setFire(4);
+        }
+        if (this.ticksExisted % 10 == 0) {
+            if (world.getBlockState(this.getPosition()).getMaterial() == Material.WATER && world.getBlockState(this.getPosition()).getValue(BlockLiquid.LEVEL) > 0) {
+                this.attackEntityFrom(WVDamageSources.DAMAGE_SOURCE_MOVING_WATER, 1.0F);
+            }
         }
     }
 
