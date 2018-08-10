@@ -8,10 +8,10 @@ import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
-import net.minecraft.entity.monster.EntityEvoker;
-import net.minecraft.entity.monster.EntityVex;
-import net.minecraft.entity.monster.EntityVindicator;
-import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.*;
+import net.minecraft.entity.passive.EntityChicken;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -33,8 +33,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-// At the moment we have the possibility of vampire babies. This may need removing in future, or we may want to make them more aggressive.
-public class EntityVampire extends EntityAgeable {
+public class EntityVampire extends EntityMob {
 
     private static final DataParameter<Integer> VARIANT = EntityDataManager.<Integer>createKey(EntityVampire.class, DataSerializers.VARINT);
 
@@ -65,22 +64,6 @@ public class EntityVampire extends EntityAgeable {
 
     }
 
-    public int getVariant()
-    {
-        return Math.max(this.dataManager.get(VARIANT).intValue(), 0);
-    }
-
-    @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("variant", getVariant());
-    }
-
-    @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        this.dataManager.set(VARIANT, compound.getInteger("variant"));
-    }
 
     @Override
     protected void initEntityAI() {
@@ -92,10 +75,28 @@ public class EntityVampire extends EntityAgeable {
         this.tasks.addTask(2, new AIVampireAvoidSun(this, 0.6D));
         this.tasks.addTask(2, new AIVampireAvoidRunningWater(this, 0.6D));
         this.tasks.addTask(3, new EntityAIWander(this, 0.6D));
-        this.tasks.addTask(4, new EntityVampire.AIVampireTarget<>(this, EntityPlayer.class));
-        this.tasks.addTask(5, new EntityVampire.AIVampireTarget<>(this, EntityVillager.class));
-        this.tasks.addTask(6, new EntityAIOpenDoor(this, true));
+        this.tasks.addTask(4, new EntityAIOpenDoor(this, true));
+        this.tasks.addTask(4, new EntityAIAttackMelee(this, 0.6D, true));
+        applyEntityAI();
 
+    }
+
+    protected void applyEntityAI() {
+        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true));
+
+        this.targetTasks.addTask(1, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
+        this.targetTasks.addTask(1, new EntityAINearestAttackableTarget<>(this, EntityVillager.class, true));
+        this.targetTasks.addTask(1, new EntityAINearestAttackableTarget<>(this, EntityPig.class, true));
+        this.targetTasks.addTask(1, new EntityAINearestAttackableTarget<>(this, EntitySheep.class, true));
+        this.targetTasks.addTask(1, new EntityAINearestAttackableTarget<>(this, EntityChicken.class, true));
+    }
+
+    @Override
+    protected void applyEntityAttributes() {
+        super.applyEntityAttributes();
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
+        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(35.0D);
     }
 
     @Override
@@ -113,17 +114,8 @@ public class EntityVampire extends EntityAgeable {
     }
 
     @Override
-    protected void applyEntityAttributes() {
-        super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
-    }
-
-    @Nullable
-    @Override
-    public EntityAgeable createChild(EntityAgeable ageable) {
-        EntityVampire vampire = new EntityVampire(this.world);
-        vampire.onInitialSpawn(this.world.getDifficultyForLocation(new BlockPos(vampire)), null);
-        return vampire;
+    public boolean attackEntityAsMob(Entity entityIn) {
+        return true;
     }
 
     @Override
@@ -139,15 +131,24 @@ public class EntityVampire extends EntityAgeable {
         }
     }
 
-    @Override
-    public boolean attackEntityAsMob(Entity entityIn) {
-        if (entityIn instanceof EntityPlayer) {
-            if (!itemVulnerabilities.contains(((EntityPlayer) entityIn).inventory.getCurrentItem().getUnlocalizedName())) {
-                return true;
-            }
-        }
-        return false;
+
+    public int getVariant()
+    {
+        return Math.max(this.dataManager.get(VARIANT).intValue(), 0);
     }
+
+    @Override
+    public void writeEntityToNBT(NBTTagCompound compound) {
+        super.writeEntityToNBT(compound);
+        compound.setInteger("variant", getVariant());
+    }
+
+    @Override
+    public void readEntityFromNBT(NBTTagCompound compound) {
+        super.readEntityFromNBT(compound);
+        this.dataManager.set(VARIANT, compound.getInteger("variant"));
+    }
+
 
     protected boolean shouldBurnInDay() {
         return true;
@@ -167,116 +168,13 @@ public class EntityVampire extends EntityAgeable {
     @Nullable
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return SoundEvents.ENTITY_PLAYER_HURT_ON_FIRE; // TODO: Try this out
+        return SoundEvents.ENTITY_PLAYER_HURT_ON_FIRE;
     }
 
     @Nullable
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.BLOCK_FIRE_EXTINGUISH; // TODO: Try this out
-    }
-
-    static class AIVampireTarget<T extends EntityLivingBase> extends EntityAINearestAttackableTarget<T> {
-        public AIVampireTarget(EntityVampire vampire, Class<T> classTarget) {
-            super(vampire, classTarget, true);
-        }
-
-        @Override
-        public boolean shouldExecute() {
-            float f = this.taskOwner.getBrightness();
-            return true;//f < 0.5F && super.shouldExecute();
-        }
-    }
-
-    static class AIVampireRestrictOpenDoor extends EntityAIBase {
-        private final EntityCreature entity;
-        private VillageDoorInfo frontDoor;
-
-        public AIVampireRestrictOpenDoor(EntityCreature creatureIn)
-        {
-            this.entity = creatureIn;
-
-            if (!(creatureIn.getNavigator() instanceof PathNavigateGround))
-            {
-                throw new IllegalArgumentException("Unsupported mob type for RestrictOpenDoorGoal");
-            }
-        }
-
-        /**
-         * Returns whether the EntityAIBase should begin execution.
-         */
-        public boolean shouldExecute()
-        {
-            if (!this.entity.world.isDaytime())
-            {
-                return false;
-            }
-            else
-            {
-                BlockPos blockpos = new BlockPos(this.entity);
-                Village village = this.entity.world.getVillageCollection().getNearestVillage(blockpos, 16);
-
-                if (village == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    this.frontDoor = village.getNearestDoor(blockpos);
-
-                    if (this.frontDoor == null)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return (double)this.frontDoor.getDistanceToInsideBlockSq(blockpos) < 2.25D;
-                    }
-                }
-            }
-        }
-
-        /**
-         * Returns whether an in-progress EntityAIBase should continue executing
-         */
-        public boolean shouldContinueExecuting()
-        {
-            if (!this.entity.world.isDaytime())
-            {
-                return false;
-            }
-            else
-            {
-                return !this.frontDoor.getIsDetachedFromVillageFlag() && this.frontDoor.isInsideSide(new BlockPos(this.entity));
-            }
-        }
-
-        /**
-         * Execute a one shot task or start executing a continuous task
-         */
-        public void startExecuting()
-        {
-            ((PathNavigateGround)this.entity.getNavigator()).setBreakDoors(false);
-            ((PathNavigateGround)this.entity.getNavigator()).setEnterDoors(false);
-        }
-
-        /**
-         * Reset the task's internal state. Called when this task is interrupted by another one
-         */
-        public void resetTask()
-        {
-            ((PathNavigateGround)this.entity.getNavigator()).setBreakDoors(true);
-            ((PathNavigateGround)this.entity.getNavigator()).setEnterDoors(true);
-            this.frontDoor = null;
-        }
-
-        /**
-         * Keep ticking a continuous task that has already been started
-         */
-        public void updateTask()
-        {
-            this.frontDoor.incrementDoorOpeningRestrictionCounter();
-        }
+        return SoundEvents.BLOCK_FIRE_EXTINGUISH;
     }
 
 }
