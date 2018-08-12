@@ -19,7 +19,7 @@ public class WVCore {
 
 	public static final String MODID = "weresandvamps";
 	public static final String NAME = "Werewolves and Vampires";
-	public static final String VERSION = "18w31a";
+	public static final String VERSION = "18w32a";
 
 	@Mod.Instance
 	public static WVCore instance;
